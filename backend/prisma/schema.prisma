@@ -20,5 +20,134 @@ model User {
   password      String  @db.VarChar(255)
   phone_number  String  @db.VarChar(255)
   refresh_token String? @db.VarChar(255)
+  insurance         UserInsurance? 
+}
 
+model UserInsurance {
+  id               String        @id @default(uuid()) @db.VarChar(255)
+  insurance_company String       @db.VarChar(255)
+  insurance_type_id String       @db.VarChar(255)
+  valid_till        DateTime      // Insurance validity period
+  policy_number     String        @db.VarChar(255)  // Additional important information, like policy number
+  coverage_amount   Decimal       // Coverage amount for the insurance
+  
+  // Foreign key back to User, creating a one-to-one relationship
+  user              User?         @relation(fields: [id], references: [id])
+}
+
+
+model Hospital {
+  id               String   @id @default(uuid()) @db.VarChar(255)
+  name             String   @db.VarChar(255)
+  address          String   @db.VarChar(255)
+  city             String   @db.VarChar(255)
+  state            String   @db.VarChar(255)
+  zip_code         String   @db.VarChar(255)
+  contact_number   String   @db.VarChar(255)
+  email            String?  @unique @db.VarChar(255)
+  website          String?  @db.VarChar(255)
+  type             String   @db.VarChar(255)  // e.g., "government", "private", "multi-specialty"
+  accreditation    String?  @db.VarChar(255)  // e.g., "NABH", "JCI"
+  account_number   String?  @db.VarChar(255)
+
+  // Relations
+  BedInfos         BedInfo[]
+  Doctors          Doctor[]
+  MedicalEquipments MedicalEquipment[]
+  Services         Service[]
+  Insurances       Insurance[]
+  PatientTestimonials PatientTestimonial[]
+  HealthPackages   HealthPackage[]
+}
+
+model BedInfo {
+  id            String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id   String  @db.VarChar(255)
+  total_beds    Int
+  bed_type      String  @db.VarChar(255)  // e.g., "general", "ICU", "maternity"
+  available_beds Int
+  price         Decimal?  // Optional for pricing info if required
+
+  // Foreign key
+  hospital      Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+}
+
+model Doctor {
+  id               String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id      String  @db.VarChar(255)
+  name             String  @db.VarChar(255)
+  specialization   String  @db.VarChar(255)
+  qualification    String  @db.VarChar(255)
+  experience_years Int
+  availability     String  @db.VarChar(255)  // e.g., "9 AM - 5 PM"
+  contact_info     String? @db.VarChar(255)
+
+  // Foreign key
+  hospital         Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+}
+
+model MedicalEquipment {
+  id                 String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id        String  @db.VarChar(255)
+  equipment_name     String  @db.VarChar(255)
+  equipment_type     String  @db.VarChar(255)
+  availability       Boolean
+  certification_status String?  @db.VarChar(255)  // e.g., "up-to-date", "pending"
+
+  // Foreign key
+  hospital           Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+}
+
+model Service {
+  id               String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id      String  @db.VarChar(255)
+  service_name     String  @db.VarChar(255)  // e.g., "Emergency care", "Surgery"
+  description      String? @db.VarChar(255)
+  availability     Boolean
+
+  // Foreign key
+  hospital         Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+}
+
+model Insurance {
+  id               String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id      String  @db.VarChar(255)
+  insurance_company String  @db.VarChar(255)
+  contact_info     String? @db.VarChar(255)
+  insurance_type_id String  @db.VarChar(255)
+
+  // Foreign key
+  hospital         Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  insurance_type   InsuranceType @relation(fields: [insurance_type_id], references: [id])
+}
+
+model InsuranceType {
+  id              String  @id @default(uuid()) @db.VarChar(255)
+  insurance_type  String  @db.VarChar(255)
+  cashless        Boolean
+
+  // Relations
+  Insurances      Insurance[]
+}
+
+model PatientTestimonial {
+  id              String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id     String  @db.VarChar(255)
+  patient_name    String  @db.VarChar(255)
+  feedback        String  @db.VarChar(255)
+  rating          Int?    // optional, 1-5 scale
+
+  // Foreign key
+  hospital        Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+}
+
+model HealthPackage {
+  id              String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id     String  @db.VarChar(255)
+  package_name    String  @db.VarChar(255)
+  description     String? @db.VarChar(255)
+  price           Decimal
+
+  // Foreign key
+  hospital        Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
