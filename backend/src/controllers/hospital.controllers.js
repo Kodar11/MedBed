@@ -1,63 +1,54 @@
-import { Router } from "express";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-
 import { prisma } from "../db/index.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-
 // Create a new hospital
 const createHospital = asyncHandler(async (req, res) => {
-    const { name, address, city, state, zip_code, contact_number, email, website, type, accreditation, account_number,
-        hospital_id, total_beds, bed_type, available_beds, price,
+    const {
+        name, address, city, state, zip_code, contact_number, email, website, type, accreditation, account_number,
+        total_beds, bed_type, available_beds, price, live_bedcount,
         specialization, qualification, experience_years, availability, contact_info,
         equipment_name, equipment_type, certification_status,
-        service_name, description, insurance_company, insurance_type_id, insurance_type, cashless,
+        service_name, service_description, insurance_company, insurance_type_id, insurance_type, cashless,
         patient_name, feedback, rating, package_name
     } = req.body;
 
     try {
-        // Hospital validation
+        // Validate required fields
         if (!name || !address || !city || !state || !zip_code || !contact_number || !type) {
             throw new ApiError(400, "Missing required hospital fields");
         }
 
-        // BedInfo validation
-        if (!hospital_id || total_beds === undefined || available_beds === undefined || !bed_type) {
+        if (total_beds === undefined || available_beds === undefined || !bed_type) {
             throw new ApiError(400, "Missing required bed fields");
         }
 
-        // Doctor validation
-        if (!hospital_id || !specialization || !qualification || experience_years === undefined || !availability) {
+        if (!specialization || !qualification || experience_years === undefined || !availability) {
             throw new ApiError(400, "Missing required doctor fields");
         }
 
-        // MedicalEquipment validation
-        if (!hospital_id || !equipment_name || !equipment_type || certification_status === undefined) {
+        if (!equipment_name || !equipment_type || certification_status === undefined) {
             throw new ApiError(400, "Missing required medical equipment fields");
         }
 
-        // Service validation
-        if (!hospital_id || !service_name || availability === undefined) {
+        if (!service_name || availability === undefined) {
             throw new ApiError(400, "Missing required service fields");
         }
 
-        // Insurance validation
-        if (!hospital_id || !insurance_company || !insurance_type_id) {
+        if (!insurance_company || !insurance_type_id) {
             throw new ApiError(400, "Missing required insurance fields");
         }
 
-        // Patient Testimonial validation
-        if (!hospital_id || !patient_name || !feedback) {
+        if (!patient_name || !feedback) {
             throw new ApiError(400, "Missing required testimonial fields");
         }
 
-        // Health Package validation
-        if (!hospital_id || !package_name || price === undefined) {
+        if (!package_name || price === undefined) {
             throw new ApiError(400, "Missing required health package fields");
         }
 
-        // Additional optional validations (e.g., email format, rating range)
+        // Optional validations
         if (email && !/\S+@\S+\.\S+/.test(email)) {
             throw new ApiError(400, "Invalid email format.");
         }
@@ -65,8 +56,16 @@ const createHospital = asyncHandler(async (req, res) => {
         if (rating !== undefined && (rating < 1 || rating > 5)) {
             throw new ApiError(400, "Rating must be between 1 and 5.");
         }
+        
+        const existingHospital = await prisma.hospital.findUnique({
+            where: { email }
+        });
 
-        // If all validations pass, create the hospital
+        if (existingHospital) {
+            throw new ApiError(409, "A hospital with this email already exists");
+        }
+        
+        // Create the hospital
         const hospital = await prisma.hospital.create({
             data: {
                 name,
@@ -86,19 +85,20 @@ const createHospital = asyncHandler(async (req, res) => {
         // Create the bed info
         const bedInfo = await prisma.bedInfo.create({
             data: {
-                hospital_id,
+                hospital_id: hospital.id,
                 total_beds,
                 bed_type,
                 available_beds,
                 price,
+                live_bedcount,
             },
         });
 
         // Create the doctor
         const doctor = await prisma.doctor.create({
             data: {
-                hospital_id,
-                name,
+                hospital_id: hospital.id,
+                name: patient_name, // Adjust as needed
                 specialization,
                 qualification,
                 experience_years,
@@ -107,11 +107,10 @@ const createHospital = asyncHandler(async (req, res) => {
             },
         });
 
-
         // Create the medical equipment
         const medicalEquipment = await prisma.medicalEquipment.create({
             data: {
-                hospital_id,
+                hospital_id: hospital.id,
                 equipment_name,
                 equipment_type,
                 availability,
@@ -119,11 +118,12 @@ const createHospital = asyncHandler(async (req, res) => {
             },
         });
 
+        // Create the service
         const service = await prisma.service.create({
             data: {
-                hospital_id,
+                hospital_id: hospital.id,
                 service_name,
-                description,
+                service_description, // Updated field name
                 availability,
             },
         });
@@ -131,7 +131,7 @@ const createHospital = asyncHandler(async (req, res) => {
         // Create the insurance record
         const insurance = await prisma.insurance.create({
             data: {
-                hospital_id,
+                hospital_id: hospital.id,
                 insurance_company,
                 contact_info,
                 insurance_type_id,
@@ -146,31 +146,33 @@ const createHospital = asyncHandler(async (req, res) => {
             },
         });
 
-        // Create the PatientTestimonial
+        // Create the Patient Testimonial
         const testimonial = await prisma.patientTestimonial.create({
             data: {
-                hospital_id,
+                hospital_id: hospital.id,
                 patient_name,
                 feedback,
                 rating
             },
         });
 
+        // Create the health package
         const healthPackage = await prisma.healthPackage.create({
             data: {
-                hospital_id,
+                hospital_id: hospital.id,
                 package_name,
-                description,
-                price
+                package_description: service_description, // Updated field name
+                package_price: price // Updated field name
             },
         });
 
-        res.status(200).json(new ApiResponse(200, { hospital, bedInfo, doctor, medicalEquipment, service, insurance, insuranceType, testimonial, healthPackage }, "User logged out"));
-    }
-
-
-    catch (error) {
-        throw new ApiError(400, 'Error creating hospital');
+        // Respond with the created hospital and related data
+        res.status(201).json(new ApiResponse(201, { 
+            hospital, bedInfo, doctor, medicalEquipment, service, insurance, insuranceType, testimonial, healthPackage 
+        }, "Hospital created successfully"));
+    } catch (error) {
+        console.error('Error creating hospital:', error);
+        throw new ApiError(400, 'Error creating hospital: ' + error.message);
     }
 });
 
@@ -239,12 +241,15 @@ const getHospitalById = asyncHandler(async (req, res) => {
                 },
                 PatientTestimonials: true,
                 HealthPackages: true,
+                Ambulances: true,
             },
         });
 
         if (!hospital) {
             throw new ApiError(404, "Hospital not found");
         }
+
+        hospital.ambulanceAvailable = hospital.Ambulances.some(ambulance => ambulance.status === 'Available');
 
         res.json(hospital);
     } 
@@ -253,17 +258,16 @@ const getHospitalById = asyncHandler(async (req, res) => {
     }
 });
 
-
 // Update a hospital 
 const updateHospital = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { 
         name, address, city, state, zip_code, contact_number, email, website, 
         type, accreditation, account_number, 
-        hospital_id, total_beds, bed_type, available_beds, price,
+        total_beds, bed_type, available_beds, price,
         specialization, qualification, experience_years, availability, contact_info,
         equipment_name, equipment_type, certification_status,
-        service_name, description, insurance_company, insurance_type_id, 
+        service_name, service_description, insurance_company, insurance_type_id, 
         insurance_type, cashless,
         patient_name, feedback, rating, package_name 
     } = req.body;
@@ -279,13 +283,13 @@ const updateHospital = asyncHandler(async (req, res) => {
 
         // Update BedInfo
         const bedInfo = await prisma.bedInfo.update({
-            where: { hospital_id },
+            where: { hospital_id: id },
             data: { total_beds, bed_type, available_beds, price },
         });
 
         // Update Doctor
         const doctor = await prisma.doctor.update({
-            where: { hospital_id },
+            where: { hospital_id: id },
             data: { 
                 specialization, qualification, experience_years, availability, contact_info 
             },
@@ -293,7 +297,7 @@ const updateHospital = asyncHandler(async (req, res) => {
 
         // Update Medical Equipment
         const medicalEquipment = await prisma.medicalEquipment.update({
-            where: { hospital_id },
+            where: { hospital_id: id },
             data: { 
                 equipment_name, equipment_type, availability: true, certification_status 
             },
@@ -301,15 +305,15 @@ const updateHospital = asyncHandler(async (req, res) => {
 
         // Update Service
         const service = await prisma.service.update({
-            where: { hospital_id },
+            where: { hospital_id: id },
             data: { 
-                service_name, description, availability: true 
+                service_name, service_description, availability: true 
             },
         });
 
         // Update Insurance
         const insurance = await prisma.insurance.update({
-            where: { hospital_id },
+            where: { hospital_id: id },
             data: { 
                 insurance_company, insurance_type_id 
             },
@@ -317,7 +321,7 @@ const updateHospital = asyncHandler(async (req, res) => {
 
         // Update Patient Testimonial
         const testimonial = await prisma.patientTestimonial.update({
-            where: { hospital_id },
+            where: { hospital_id: id },
             data: { 
                 patient_name, feedback, rating 
             },
@@ -325,9 +329,9 @@ const updateHospital = asyncHandler(async (req, res) => {
 
         // Update Health Package
         const healthPackage = await prisma.healthPackage.update({
-            where: { hospital_id },
+            where: { hospital_id: id },
             data: { 
-                package_name, description, price 
+                package_name, package_description: service_description, package_price: price 
             },
         });
 
@@ -336,7 +340,6 @@ const updateHospital = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Error updating hospital or related entities: " + error.message);
     }
 });
-
 
 // Delete a hospital 
 const deleteHospital = asyncHandler(async (req, res) => {
@@ -357,11 +360,9 @@ const deleteHospital = asyncHandler(async (req, res) => {
 
         res.status(204).send();
     } 
-    catch (error) 
-    {
+    catch (error) {
         throw new ApiError(400, "Error deleting hospital and related entities: " + error.message);
     }
 });
-
 
 export { createHospital, getAllHospitals, getHospitalById, updateHospital, deleteHospital };
