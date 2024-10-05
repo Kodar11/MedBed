@@ -14,8 +14,8 @@ const router = Router();
 router.route("/createHospital").post(createHospital)
 router.route("/getAllHospitals").get(getAllHospitals);
 
-router.route("/getHospitalById/:id").get(getHospitalById)
-router.route("/updateHospital/:id").put(verifyJWT, updateHospital)
-router.route("/deleteHospital/:id").delete(verifyJWT, deleteHospital);
+router.route("/getHospitalById").get(getHospitalById)
+router.route("/updateHospital").put(updateHospital)
+router.route("/deleteHospital").delete(deleteHospital);
 
 export default router;

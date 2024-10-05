@@ -15,7 +15,7 @@ model User {
   phone_number  String  @db.VarChar(255)
   refresh_token String? @db.VarChar(255)
   insurance     UserInsurance? 
-}
+} 
 
 model UserInsurance {
   id               String        @id @default(uuid()) @db.VarChar(255)

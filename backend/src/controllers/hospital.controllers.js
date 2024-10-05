@@ -167,7 +167,7 @@ const createHospital = asyncHandler(async (req, res) => {
         });
 
         // Respond with the created hospital and related data
-        res.status(201).json(new ApiResponse(201, { 
+        return res.status(201).json(new ApiResponse(201, { 
             hospital, bedInfo, doctor, medicalEquipment, service, insurance, insuranceType, testimonial, healthPackage 
         }, "Hospital created successfully"));
     } catch (error) {
@@ -223,11 +223,11 @@ const getAllHospitals = asyncHandler(async (req, res) => {
 });
 
 // Read a single hospital by ID
-const getHospitalById = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+        const getHospitalById = asyncHandler(async (req, res) => {
+    const { id } = req.body;
 
     try {
-        const hospital = await prisma.hospital.findUnique({
+        const hospital = await prisma.hospital.findFirst({
             where: { id },
             include: {
                 BedInfos: true,
@@ -260,7 +260,7 @@ const getHospitalById = asyncHandler(async (req, res) => {
 
 // Update a hospital 
 const updateHospital = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.body;
     const { 
         name, address, city, state, zip_code, contact_number, email, website, 
         type, accreditation, account_number, 
@@ -343,7 +343,7 @@ const updateHospital = asyncHandler(async (req, res) => {
 
 // Delete a hospital 
 const deleteHospital = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.body;
 
     try {
         // Delete related entities first to maintain referential integrity
@@ -358,7 +358,9 @@ const deleteHospital = asyncHandler(async (req, res) => {
         // Finally, delete the hospital
         await prisma.hospital.delete({ where: { id } });
 
-        res.status(204).send();
+        return res.status(204).json(
+            new ApiResponse(204,id,"Deleted successfully")
+        );
     } 
     catch (error) {
         throw new ApiError(400, "Error deleting hospital and related entities: " + error.message);
