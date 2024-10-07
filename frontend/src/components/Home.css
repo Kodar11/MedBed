@@ -1,0 +1,79 @@
+General Styling
+body {
+  
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #f0f4f8;
+  color: #333;
+}
+
+/* Home Section */
+.Home {
+  background-color: #e3f2fd;
+  text-align: center;
+  padding: 50px 0;
+}
+
+
+
+/* Map Section */
+.map-section {
+  margin: 40px 0;
+}
+
+/* Load More Button */
+.load-more {
+  display: block;
+  margin: 30px auto;
+  padding: 12px 30px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.load-more:hover {
+  background-color: #0056b3;
+}
+
+/* Footer Styling */
+footer {
+  background-color: #0069d9;
+  color: white;
+  padding: 60px 20px;
+  font-size: 14px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-content div {
+  max-width: 200px;
+  text-align: left;
+}
+
+.footer-bottom {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 12px;
+  color: #bbb;
+}
+
+.footer-bottom a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer-bottom a:hover {
+  text-decoration: underline;
+}
