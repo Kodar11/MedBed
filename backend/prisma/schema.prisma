@@ -42,6 +42,10 @@ model Hospital {
   accreditation    String?  @db.VarChar(255)
   account_number   String?  @db.VarChar(255)
 
+  // New fields for images
+  mainImage        String?  @db.VarChar(255) // URL for the main image
+  subImages        String[]  // Array of URLs for sub-images
+
   // Relations
   BedInfos         BedInfo[]
   Doctors          Doctor[]
@@ -52,6 +56,7 @@ model Hospital {
   HealthPackages   HealthPackage[]
   Ambulances       Ambulance[]
 }
+
 
 model BedInfo {
   id            String  @id @default(uuid()) @db.VarChar(255)
