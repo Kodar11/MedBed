@@ -1,4 +1,16 @@
 -- CreateTable
+CREATE TABLE "User" (
+    "id" VARCHAR(255) NOT NULL,
+    "username" VARCHAR(255) NOT NULL,
+    "email" VARCHAR(255) NOT NULL,
+    "password" VARCHAR(255) NOT NULL,
+    "phone_number" VARCHAR(255) NOT NULL,
+    "refresh_token" VARCHAR(255),
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "UserInsurance" (
     "id" VARCHAR(255) NOT NULL,
     "insurance_company" VARCHAR(255) NOT NULL,
@@ -24,6 +36,8 @@ CREATE TABLE "Hospital" (
     "type" VARCHAR(255) NOT NULL,
     "accreditation" VARCHAR(255),
     "account_number" VARCHAR(255),
+    "mainImage" VARCHAR(255),
+    "subImages" TEXT[],
 
     CONSTRAINT "Hospital_pkey" PRIMARY KEY ("id")
 );
@@ -36,6 +50,7 @@ CREATE TABLE "BedInfo" (
     "bed_type" VARCHAR(255) NOT NULL,
     "available_beds" INTEGER NOT NULL,
     "price" DECIMAL(65,30),
+    "live_bedcount" INTEGER NOT NULL,
 
     CONSTRAINT "BedInfo_pkey" PRIMARY KEY ("id")
 );
@@ -71,7 +86,7 @@ CREATE TABLE "Service" (
     "id" VARCHAR(255) NOT NULL,
     "hospital_id" VARCHAR(255) NOT NULL,
     "service_name" VARCHAR(255) NOT NULL,
-    "description" VARCHAR(255),
+    "service_description" VARCHAR(255),
     "availability" BOOLEAN NOT NULL,
 
     CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
@@ -113,11 +128,30 @@ CREATE TABLE "HealthPackage" (
     "id" VARCHAR(255) NOT NULL,
     "hospital_id" VARCHAR(255) NOT NULL,
     "package_name" VARCHAR(255) NOT NULL,
-    "description" VARCHAR(255),
-    "price" DECIMAL(65,30) NOT NULL,
+    "package_description" VARCHAR(255),
+    "package_price" DECIMAL(65,30) NOT NULL,
 
     CONSTRAINT "HealthPackage_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateTable
+CREATE TABLE "Ambulance" (
+    "id" TEXT NOT NULL,
+    "hospital_id" VARCHAR(255) NOT NULL,
+    "type" VARCHAR(255) NOT NULL,
+    "capacity" INTEGER NOT NULL,
+    "equipment" TEXT[],
+    "location" VARCHAR(255) NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'Available',
+
+    CONSTRAINT "Ambulance_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Hospital_email_key" ON "Hospital"("email");
@@ -148,3 +182,6 @@ ALTER TABLE "PatientTestimonial" ADD CONSTRAINT "PatientTestimonial_hospital_id_
 
 -- AddForeignKey
 ALTER TABLE "HealthPackage" ADD CONSTRAINT "HealthPackage_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Ambulance" ADD CONSTRAINT "Ambulance_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;
