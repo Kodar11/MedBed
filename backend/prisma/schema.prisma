@@ -14,8 +14,9 @@ model User {
   password      String  @db.VarChar(255)
   phone_number  String  @db.VarChar(255)
   refresh_token String? @db.VarChar(255)
-  insurance     UserInsurance? 
 } 
+
+
 
 model UserInsurance {
   id               String        @id @default(uuid()) @db.VarChar(255)
@@ -25,7 +26,7 @@ model UserInsurance {
   policy_number     String        @db.VarChar(255)
   coverage_amount   Decimal       
   
-  user              User?         @relation(fields: [id], references: [id])
+  // user              User?         @relation(fields: [id], references: [id])
 }
 
 model Hospital {
@@ -42,6 +43,10 @@ model Hospital {
   accreditation    String?  @db.VarChar(255)
   account_number   String?  @db.VarChar(255)
 
+  // New fields for images
+  mainImage        String?  @db.VarChar(255) // URL for the main image
+  subImages        String[]  // Array of URLs for sub-images
+
   // Relations
   BedInfos         BedInfo[]
   Doctors          Doctor[]
@@ -50,8 +55,8 @@ model Hospital {
   Insurances       Insurance[]
   PatientTestimonials PatientTestimonial[]
   HealthPackages   HealthPackage[]
-  Ambulances       Ambulance[]
 }
+
 
 model BedInfo {
   id            String  @id @default(uuid()) @db.VarChar(255)
@@ -146,6 +151,4 @@ model Ambulance {
   equipment String[]                      
   location  String   @db.VarChar(255)
   status    String   @default("Available") 
-  
-  hospital        Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }

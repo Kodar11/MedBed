@@ -25,8 +25,7 @@ export const verifyJWT = asyncHandler(async(req, _, next) => {
                 email : true
             }
         });
-    
-    
+
         if (!user) {
             
             throw new ApiError(401, "Invalid Access Token")

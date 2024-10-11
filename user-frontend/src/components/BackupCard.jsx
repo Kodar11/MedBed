@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';  // Assuming you're using react-router-dom for navigation
-import axios from 'axios';
 
 function Card() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
-    const navigate = useNavigate();
 
     useEffect(() => {
         // Function to update the screen size
@@ -18,26 +15,6 @@ function Card() {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
-
-    // Function to handle reserve bed click
-    const handleReserveBedClick = async () => {
-        try {
-            // Check if the user is authenticated by calling your backend
-            const response = await axios.get('/api/auth/verify');  // Adjust the endpoint as needed
-            if (response.status === 200) {
-                // User is authenticated, navigate to the reserve bed page
-                navigate('/reserveBed');
-            }
-        } catch (error) {
-            // If there's an error (401 Unauthorized), redirect to the login page
-            if (error.response?.status === 401) {
-                navigate('/login');
-            } else {
-                console.error("Error checking authentication", error);
-            }
-        }
-    };
-
     return (
         <div className="bg-gradient-to-r from-blue-300 to-white rounded-lg p-6 max-w-4xl mx-auto my-4 shadow-lg flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
             <div className="flex-2 text-center md:text-left ">
@@ -53,9 +30,9 @@ function Card() {
             </div>
 
             {/* For larger screens */}
+
             {screenSize > 600 &&
                 (<div className="flex justify-between items-center space-x-4">
-
                     <div className="flex flex-col text-center items-center justify-center">
                         <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg mb-2">
                             <span>10</span>
@@ -63,14 +40,9 @@ function Card() {
                         <p className="text-sm">Available</p>
                         <p className="text-sm">Beds</p>
                     </div>
-
-
-                    {/* Reserve Bed Icon */}
+            
                     <div className="flex flex-col justify-around items-center">
-                        <div
-                            className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center cursor-pointer"
-                            onClick={handleReserveBedClick}  // Add click handler
-                        >
+                        <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center">
                             <svg
                                 version="1.1"
                                 id="Layer_1"
@@ -82,13 +54,34 @@ function Card() {
                                 xmlSpace="preserve"
                                 className="w-8 h-8"
                             >
-                                {/* SVG content for reserve bed */}
+                                <style>
+                                    {`
+                      .st12{fill:#fff}
+                      .st17{fill:none;stroke:#000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+                      .st18{opacity:.3}
+                    `}
+                                </style>
+                                <g id="Vector">
+                                    <path d="M57.62 40.94v10c-.23.05-.47.07-.72.07H8.26a3.8 3.8 0 0 1-2.17-.68v-8.78a3.8 3.8 0 0 1 2.17-.68h48.63c.26 0 .5.03.73.07z" style={{ fill: '#47c8f5' }} />
+                                    <path d="M19.54 36.96v2.69c0 .43-.06.84-.16 1.22H8.26c-.8 0-1.55.25-2.17.68v-9.34h8.72c2.6.01 4.73 2.13 4.73 4.75z" style={{ fill: '#ffc613' }} />
+                                    <path style={{ fill: '#c52026' }} d="M46.59 12.65v8.69h-9.28v9.28h-8.69v-9.28h-9.28v-8.69h9.28V3.38h8.69v9.27z" />
+                                </g>
+                                <g id="Line">
+                                    <path className="st17" d="M57.62 40.94v10c-.23.05-.47.07-.72.07H8.26a3.8 3.8 0 0 1-2.17-.68v-8.78a3.8 3.8 0 0 1 2.17-.68h48.63c.26 0 .5.03.73.07z" />
+                                    <path className="st17" d="M19.54 36.96v2.69c0 .43-.06.84-.16 1.22H8.26c-.8 0-1.55.25-2.17.68v-9.34h8.72c2.6.01 4.73 2.13 4.73 4.75zM5.65 22.88V58.6M57.62 34.45V58.6M46.59 12.65v8.69h-9.28v9.28h-8.69v-9.28h-9.28v-8.69h9.28V3.38h8.69v9.27z" />
+                                </g>
+                                <g className="st18" id="shadow">
+                                    <path d="M57.62 50.95v-10c-.23-.05-.47-.07-.72-.07H39.2v10.14h17.7c.25-.01.49-.03.72-.07zM39.19 12.65h7.4v8.69h-7.4z" />
+                                </g>
+                                <g className="st18" id="Highligth">
+                                    <path className="st12" d="M4.81 50.95v-10c.23-.05.47-.07.72-.07h17.7v10.14H5.53a5.49 5.49 0 0 1-.72-.07zM15.84 12.65h9.56v8.69h-9.56z" />
+                                </g>
                             </svg>
                         </div>
                         <p className="text-sm text-center">Reserve</p>
                         <p className="text-sm text-center">Bed</p>
                     </div>
-
+            
                     <div className="flex flex-col justify-around items-center">
                         <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center">
                             <svg
@@ -103,7 +96,7 @@ function Card() {
                         <p className="text-sm text-center">Directions</p>
                         <p className="text-sm text-center">Navigation</p>
                     </div>
-
+            
                     <div className="flex flex-col text-center items-center justify-center">
                         <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg mb-2">
                             <span role="img" aria-label="ambulance">🚑</span>
@@ -111,29 +104,28 @@ function Card() {
                         <p className="text-sm">Call</p>
                         <p className="text-sm">Ambulance</p>
                     </div>
-                </div>)
+                </div>
+            )
             }
 
             {/* For mobile view */}
             <div className="">
+
+
                 {screenSize < 600 && (
                     <div className="rounded-lg shadow-lg">
                         <div className="flex justify-evenly gap-4">
-
-                            <div className="flex flex-col text-center items-center justify-center">
-                                <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg mb-2">
+                            {/* Available Beds */}
+                            <div className="flex flex-col justify-center items-center">
+                                <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg">
                                     <span>10</span>
                                 </div>
-                                <p className="text-sm">Available</p>
-                                <p className="text-sm">Beds</p>
+                                <p className="text-sm text-center">Available</p>
+                                <p className="text-sm text-center">Beds</p>
                             </div>
 
-
-                            {/* Reserve Bed for mobile */}
-                            <div
-                                className="flex flex-col justify-center items-center"
-                                onClick={handleReserveBedClick}  // Add click handler
-                            >
+                            {/* Reserve Bed */}
+                            <div className="flex flex-col justify-center items-center">
                                 <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center">
                                     <svg
                                         version="1.1"
@@ -146,15 +138,36 @@ function Card() {
                                         xmlSpace="preserve"
                                         className="w-8 h-8"
                                     >
-                                        {/* SVG content for reserve bed */}
+                                        <style>
+                                            {`
+          .st12{fill:#fff}
+          .st17{fill:none;stroke:#000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+          .st18{opacity:.3}
+        `}
+                                        </style>
+                                        <g id="Vector">
+                                            <path d="M57.62 40.94v10c-.23.05-.47.07-.72.07H8.26a3.8 3.8 0 0 1-2.17-.68v-8.78a3.8 3.8 0 0 1 2.17-.68h48.63c.26 0 .5.03.73.07z" style={{ fill: '#47c8f5' }} />
+                                            <path d="M19.54 36.96v2.69c0 .43-.06.84-.16 1.22H8.26c-.8 0-1.55.25-2.17.68v-9.34h8.72c2.6.01 4.73 2.13 4.73 4.75z" style={{ fill: '#ffc613' }} />
+                                            <path style={{ fill: '#c52026' }} d="M46.59 12.65v8.69h-9.28v9.28h-8.69v-9.28h-9.28v-8.69h9.28V3.38h8.69v9.27z" />
+                                        </g>
+                                        <g id="Line">
+                                            <path className="st17" d="M57.62 40.94v10c-.23.05-.47.07-.72.07H8.26a3.8 3.8 0 0 1-2.17-.68v-8.78a3.8 3.8 0 0 1 2.17-.68h48.63c.26 0 .5.03.73.07z" />
+                                            <path className="st17" d="M19.54 36.96v2.69c0 .43-.06.84-.16 1.22H8.26c-.8 0-1.55.25-2.17.68v-9.34h8.72c2.6.01 4.73 2.13 4.73 4.75zM5.65 22.88V58.6M57.62 34.45V58.6M46.59 12.65v8.69h-9.28v9.28h-8.69v-9.28h-9.28v-8.69h9.28V3.38h8.69v9.27z" />
+                                        </g>
+                                        <g className="st18" id="shadow">
+                                            <path d="M57.62 50.95v-10c-.23-.05-.47-.07-.72-.07H39.2v10.14h17.7c.25-.01.49-.03.72-.07zM39.19 12.65h7.4v8.69h-7.4z" />
+                                        </g>
+                                        <g className="st18" id="Highligth">
+                                            <path className="st12" d="M4.81 50.95v-10c.23-.05.47-.07.72-.07h17.7v10.14H5.53a5.49 5.49 0 0 1-.72-.07zM15.84 12.65h9.56v8.69h-9.56z" />
+                                        </g>
                                     </svg>
                                 </div>
                                 <p className="text-sm text-center">Reserve</p>
                                 <p className="text-sm text-center">Bed</p>
                             </div>
 
-
-                            <div className="flex flex-col justify-around items-center">
+                            {/* Directions & Navigation */}
+                            <div className="flex flex-col justify-center items-center">
                                 <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -169,19 +182,23 @@ function Card() {
                                 <p className="text-sm text-center">Navigation</p>
                             </div>
 
-                            <div className="flex flex-col text-center items-center justify-center">
-                                <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg mb-2">
+                            {/* Call Ambulance */}
+                            <div className="flex flex-col justify-center items-center">
+                                <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg">
                                     <span role="img" aria-label="ambulance">🚑</span>
                                 </div>
-                                <p className="text-sm">Call</p>
-                                <p className="text-sm">Ambulance</p>
+                                <p className="text-sm text-center">Call</p>
+                                <p className="text-sm text-center">Ambulance</p>
                             </div>
                         </div>
                     </div>
                 )}
+
+
             </div>
         </div>
     );
+
 }
 
 export default Card;
