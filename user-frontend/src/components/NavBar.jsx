@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
 function NavBar() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -16,7 +17,6 @@ function NavBar() {
         };
     }, []);
 
-
     return (
         <>
             {screenSize > 600 && (
@@ -24,8 +24,8 @@ function NavBar() {
                     <div className="flex justify-between gap-6 items-center">
                         <div className="text-xl font-semibold">MedBed</div>
                         <div className="flex gap-4 font-medium cursor-pointer">
-                            <div>Home</div>
-                            <div>Check Availability</div>
+                            <Link to="/reservations">Reservations</Link>
+                            <Link to="/logout">Logout</Link>
                         </div>
                     </div>
                     <div>
@@ -61,14 +61,14 @@ function NavBar() {
                 </nav>
             )}
 
-            {screenSize < 600 && (
+            {screenSize <= 600 && (
                 <div>
                     <nav className="w-full p-4 bg-trust-color text-white">
                         <div className="flex justify-between gap-6 items-center">
                             <div className="text-xl font-semibold">MedBed</div>
                             <div className="flex gap-4 font-medium cursor-pointer">
-                                <div>Home</div>
-                                <div>Check Availability</div>
+                                <Link to="/reservations">Reservations</Link>
+                                <Link to="/logout">Logout</Link>
                             </div>
                         </div>
                     </nav>
@@ -100,7 +100,6 @@ function NavBar() {
                     </div>
                 </div>
             )}
-
         </>
     );
 }

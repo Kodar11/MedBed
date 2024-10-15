@@ -11,10 +11,10 @@ const BedReservations = () => {
         setLoading(true);
         // Replace with your actual API endpoint and reservation ID
         const { data } = await axios.post("https://localhost:3000/api/v1/users/send-payment-info", {
-          reservationId: "your-reservation-id-here", // Dynamically set the reservation ID
+          reservationId: "be2da687-90c3-49ad-9f86-1247eb82b8e0", // Dynamically set the reservation ID
         });
 
-        // Assuming the response structure has `data` containing the reservation array
+        // Assuming the response structure has `data` containing the reservation details
         setReservations([data.payload]); // Set the reservation data from API response
         setLoading(false);
       } catch (error) {
@@ -45,15 +45,24 @@ const BedReservations = () => {
                         Payment ID: {reservation.payment_id}
                       </h4>
                       <p className="text-gray-600 max-sm:text-sm">
-                        Bed Reservation Time: {new Date(reservation.bed_reservation_time).toLocaleString()}
+                        Bed Reservation Time: {reservation.bed_reservation_time
+                          ? new Date(reservation.bed_reservation_time).toLocaleString()
+                          : "Not available"}
                       </p>
                       <p className="text-gray-600 max-sm:text-sm">
-                        Check-In Time:{" "}
-                        {reservation.check_in_time
+                        Check-In Time: {reservation.check_in_time
                           ? new Date(reservation.check_in_time).toLocaleString()
                           : "Not yet checked in"}
                       </p>
+                      <p className="text-gray-600 max-sm:text-sm">
+                        Late Patient: {reservation.late_patient ? "Yes" : "No"}
+                      </p>
                     </div>
+                  </div>
+                  <div className="text-gray-500 max-sm:text-sm">
+                    <p>Username: {reservation.user_info.username}</p>
+                    <p>Email: {reservation.user_info.email}</p>
+                    <p>Phone Number: {reservation.user_info.phone_number}</p>
                   </div>
                 </li>
               ))}
