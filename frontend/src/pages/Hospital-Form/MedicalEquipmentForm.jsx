@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-function MedicalEquipmentForm({check}) {
+function MedicalEquipmentForm({data, check}) {
   const [equiID, setEquiID] = useState(2);
 
   const [equipmentData, setEquipmentData] = useState([
@@ -12,6 +12,12 @@ function MedicalEquipmentForm({check}) {
       certification_status: '',
     },
   ]);
+
+//   useEffect(() => {
+//     if (data) {
+//       setEquipmentData(data); // Preload the form data when available
+//     }
+// }, [data]);
 
   const handleChange = (index, e) => {
     const { name, value, type, checked } = e.target;
@@ -43,7 +49,7 @@ function MedicalEquipmentForm({check}) {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(equipmentData); 
-    check(equipmentData);
+    check(equipmentData,5);
   };
 
   return (

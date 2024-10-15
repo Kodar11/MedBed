@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-function BedInfoForm({ check }) {
+function BedInfoForm({ data, check }) {
 
   const [bedNo, setBedNo] = useState(2);
 
@@ -14,10 +14,23 @@ function BedInfoForm({ check }) {
     },
   ]);
 
+//   useEffect(() => {
+//     if (data) {
+//       setBedData(data); // Preload the form data when available
+//     }
+// }, [data]);
 
   const handleChange = (index, e) => {
+    const { name, value } = e.target;
     const updatedBedData = [...bedData];
-    updatedBedData[index][e.target.name] = e.target.value;
+    if (name === "total_beds" || name === "available_beds") {
+      updatedBedData[index][name] = parseInt(value, 10) || 0;
+    } else if (name === "price") {
+      updatedBedData[index][name] = parseFloat(value) || 0;
+    } else {
+      updatedBedData[index][name] = value;
+    }
+    // updatedBedData[index][e.target.name] = e.target.value;
     setBedData(updatedBedData);
   };
 
@@ -44,7 +57,7 @@ function BedInfoForm({ check }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (check) {
-      check(bedData);
+      check(bedData,3);
     } else {
       console.error("onSubmit is not defined.");
     }

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-function ServiceForm({check}) {
+function ServiceForm({data, check}) {
   const [serviceID, setServiceID] = useState(2);
 
   const [serviceData, setServiceData] = useState([
@@ -11,6 +11,12 @@ function ServiceForm({check}) {
       availability: false,
     },
   ]);
+
+//   useEffect(() => {
+//     if (data) {
+//       setServiceData(data); // Preload the form data when available
+//     }
+// }, [data]);
 
   const handleChange = (index, e) => {
     const { name, value, type, checked } = e.target;
@@ -41,7 +47,7 @@ function ServiceForm({check}) {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(serviceData); 
-    check(serviceData);
+    check(serviceData,6);
   };
 
   return (

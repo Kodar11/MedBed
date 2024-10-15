@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-function HospitalInfo({check}) {
+function HospitalInfo({data, check}) {
 
     const [hospitalData, setHospitalData] = useState({
         name: '',
@@ -20,7 +20,13 @@ function HospitalInfo({check}) {
         setHospitalData({ ...hospitalData, [e.target.name]: e.target.value });
     };
 
+    // useEffect(() => {
+    //     if (data) {
+    //         setHospitalData(data); // Preload the form data when available
+    //     }
+    // }, [data]);
 
+    var stepNo = 1;
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -29,7 +35,8 @@ function HospitalInfo({check}) {
             return;
         }
         if (check) {  // Ensure onSubmit is defined before calling it
-            check(hospitalData);  
+            stepNo = 2;
+            check(hospitalData,stepNo);  
         } else {
             console.error("onSubmit is not defined.");
         }

@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import Navbar from "./Navbar";
-import HospitalInfo from "../pages/Hospital-Form/HospitalInfo"
-import BedInfoForm from "../pages/Hospital-Form/BedInfoForm"
+import axios from "axios";
+
+import HospitalInfo from "../pages/Hospital-Form/HospitalInfo";
+import BedInfoForm from "../pages/Hospital-Form/BedInfoForm";
 import DoctorForm from "../pages/Hospital-Form/DoctorForm";
-import MedicalEquipmentForm from "../pages/Hospital-Form/MedicalEquipmentForm"
+import MedicalEquipmentForm from "../pages/Hospital-Form/MedicalEquipmentForm";
 import ServiceForm from "../pages/Hospital-Form/ServiceForm";
 import InsuranceForm from "../pages/Hospital-Form/InsuranceForm";
-import SinglePhotoUpload from "./Upload_Images/SinglePhotoUpload";
-import MultiplePhotoUpload from "./Upload_Images/MultiplePhotoUpload";
+import HealthPackage from "../pages/Hospital-Form/HealthPackage";
+import UploadImages from "../pages/Hospital-Form/UploadImages";
 
-// Step-based form handler for Hospital-related schemas
 function HospitalFormNavbar() {
-    const [activeStep, setActiveStep] = useState(1); // Track the current form step
+    const [activeStep, setActiveStep] = useState(1); 
 
     const [formData, setFormData] = useState({
         hospital: {},
@@ -20,70 +20,191 @@ function HospitalFormNavbar() {
         medicalEquipment: {},
         service: {},
         insurance: {},
+        healthPackages: {},
+        
     });
 
-    const data = useState([]);
+    // mainImage: null,
+    // subImages: [],
 
-    const handleFormSubmit = (formName, data) => {
-        setFormData((formData) => ({
-            ...formData,
+    const handleFormSubmit = (formName, data, stepNo) => {
+        setFormData((prevFormData) => ({
+            ...prevFormData,
             [formName]: data,
         }));
-        console.log(`Data for ${formName}: `, data);
+        setActiveStep(stepNo);
         console.log(formData);
+        
     };
 
+    // const handleImageUpload = (imageType, images) => {
+    //     if (imageType === "mainImage" && images.length > 0) {
+    //         setFormData((prevFormData) => ({
+    //             ...prevFormData,
+    //             mainImage: images[0],
+    //         }));
+    //     } else if (imageType === "subImages" && images.length > 0) {
+    //         setFormData((prevFormData) => ({
+    //             ...prevFormData,
+    //             subImages: [...prevFormData.subImages, ...images],
+    //         }));
+    //     }
+    //     setActiveStep(9);
+    // };
 
-    // Render dynamic forms based on the current step (Hospital, BedInfo, Doctor, etc.)
+    // const handleFinalSubmit = async () => {
+    //     const finalData = new FormData();
+
+    //     console.log(formData);
+        
+    //     // Append non-file data
+    //     Object.keys(formData).forEach((key) => {
+    //         if (key !== "mainImage" && key !== "subImages") {
+    //             console.log("Vivek" , key , formData[key]);
+    //             if (typeof formData[key] === 'object' && formData[key] !== null) {
+    //                 Object.entries(formData[key]).forEach(([subKey, subValue]) => {
+    //                     finalData.append(`${key}[${subKey}]`, subValue);
+    //                 });
+    //             } else {
+    //                 finalData.append(key, formData[key]);
+    //             }
+    //             console.log(finalData);
+    //         }
+    //     });
+        
+    //     // Append the mainImage (if it exists)
+    //     if (formData.mainImage) {
+    //         finalData.append("mainImage", formData.mainImage);
+    //     }
+        
+    //     // Append subImages (if any)
+    //     if (formData.subImages.length > 0) {
+    //         formData.subImages.forEach((image, index) => {
+    //             finalData.append(`subImages[${index}]`, image);
+    //         });
+    //     }
+    
+    //     // Create the hospital in the backend
+    //     try {
+    //         console.log("hello " , finalData);
+    //         const response = await axios.post(
+    //             'http://localhost:8000/api/v1/hospitals/createHospital',
+    //             finalData,
+    //             {
+    //                 headers: { 'Content-Type': 'multipart/form-data' },
+    //             }
+    //         );
+    //         console.log("Hospital created successfully", response.data);
+    //     } catch (error) {
+    //         console.error("Error creating hospital:", error.response?.data || error.message);
+    //     }
+    // };
+    
+
+    const handleFinalSubmit = async () => {
+        // const finalData = new FormData();
+    
+        // Append non-file data
+        // Object.keys(formData).forEach((key) => {
+        //     if (key !== "mainImage" && key !== "subImages") {
+        //         if (typeof formData[key] === 'object' && formData[key] !== null) {
+        //             // Log the nested object to see its structure
+        //             console.log("Processing object:", formData[key]);
+        //             Object.entries(formData[key]).forEach(([subKey, subValue]) => {
+        //                 console.log(`${key}[${subKey}]`, subValue);
+        //                 finalData.append(`${key}[${subKey}]`, subValue.toString());
+        //             });
+        //         } else {
+        //             console.log("Appending simple key-value pair:");
+        //             console.log(key, formData[key]);
+        //             finalData.append(key, formData[key]);
+        //         }
+        //     }
+        // });
+    
+        // Append the mainImage (if it exists)
+        // if (formData.mainImage) {
+        //     finalData.append("mainImage", formData.mainImage);
+        // }
+    
+        // // Append subImages (if any)
+        // if (formData.subImages.length > 0) {
+        //     formData.subImages.forEach((image, index) => {
+        //         finalData.append(`subImages[${index}]`, image);
+        //     });
+        // }
+
+        console.log(formData);
+    
+        // Create the hospital in the backend
+        try {
+            const response = await axios.post(
+                'http://localhost:8000/api/v1/hospitals/createHospital',
+                formData,
+                
+            );
+            console.log("Hospital created successfully", response.data);
+        } catch (error) {
+            console.error("Error creating hospital:", error.response?.data || error.message);
+        }
+    };
+    
+    
+    
     const renderForm = () => {
         switch (activeStep) {
             case 1:
-                // Hospital Information
-                return (
-                    <HospitalInfo check={(data) => handleFormSubmit("hospital", data)}/>
-                );
+                return <HospitalInfo 
+                            data={formData.hospital} // Pass saved data
+                            check={(data, stepNo) => handleFormSubmit("hospital", data, stepNo)} 
+                        />;
             case 2:
-                // Bed Information
-                return (
-                    <BedInfoForm check={(data) => handleFormSubmit("beds", data)}/>
-                );
+                return <BedInfoForm 
+                            data={formData.beds} // Pass saved data
+                            check={(data, stepNo) => handleFormSubmit("beds", data, stepNo)} 
+                        />;
             case 3:
-                // Doctor Information
-                return (
-                    <DoctorForm check={(data) => handleFormSubmit("doctor", data)}/>
-                );
+                return <DoctorForm 
+                            data={formData.doctor} // Pass saved data
+                            check={(data, stepNo) => handleFormSubmit("doctor", data, stepNo)} 
+                        />;
             case 4:
-                // Medical Equipment
-                return (
-                    <MedicalEquipmentForm check={(data) => handleFormSubmit("medicalEquipment", data)}/>
-                );
+                return <MedicalEquipmentForm 
+                            data={formData.medicalEquipment} // Pass saved data
+                            check={(data, stepNo) => handleFormSubmit("medicalEquipment", data, stepNo)} 
+                        />;
             case 5:
-                // Medical services
-                return (
-                    <ServiceForm check={(data) => handleFormSubmit("service", data)}/>
-                );
+                return <ServiceForm 
+                            data={formData.service} // Pass saved data
+                            check={(data, stepNo) => handleFormSubmit("service", data, stepNo)} 
+                        />;
             case 6:
-                // Medical Equipment
-                return (
-                    <InsuranceForm check={(data) => handleFormSubmit("insurance", data)}/>
-                );
+                return <InsuranceForm 
+                            data={formData.insurance} // Pass saved data
+                            check={(data, stepNo) => handleFormSubmit("insurance", data, stepNo)} 
+                        />;
             case 7:
-                // Medical Equipment
+                return <HealthPackage 
+                            data={formData.healthPackages} // Pass saved data
+                            check={(data, stepNo) => handleFormSubmit("healthPackages", data, stepNo)} 
+                        />;
+            case 8:
                 return (
-                    <>
-                        <SinglePhotoUpload/>
-                        <MultiplePhotoUpload/>
-                    </>
-                    
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                        <h2 className="text-xl font-semibold">Review and Submit</h2>
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleFinalSubmit}>
+                            Submit Hospital Form
+                        </button>
+                    </div>
                 );
             default:
                 return null;
         }
     };
+    
 
     return (
         <>
-            <Navbar />
             <ol className="flex items-center w-full p-3 space-x-2 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 shadow-sm sm:text-base sm:p-4 sm:space-x-4">
                 <li className={`flex items-center cursor-pointer ${activeStep === 1 ? "text-blue-600" : ""}`} onClick={() => setActiveStep(1)}>
                     <span className={`flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 1 ? "border-blue-600" : "border-gray-500"}`}>1</span>
@@ -106,12 +227,17 @@ function HospitalFormNavbar() {
                     Services
                 </li>
                 <li className={`flex items-center cursor-pointer ${activeStep === 6 ? "text-blue-600" : ""}`} onClick={() => setActiveStep(6)}>
-                    <span className={` flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 6 ? "border-blue-600" : "border-gray-500"}`}>6</span>
+                    <span className={`flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 6 ? "border-blue-600" : "border-gray-500"}`}>6</span>
                     <p className="max-sm:hidden">Insurances</p>
                 </li>
                 <li className={`flex items-center cursor-pointer ${activeStep === 7 ? "text-blue-600" : ""}`} onClick={() => setActiveStep(7)}>
-                    <span className={` flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 7 ? "border-blue-600" : "border-gray-500"}`}>7</span>
-                    <p className="max-sm:hidden">Add Images</p>
+                    <span className={`flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 7 ? "border-blue-600" : "border-gray-500"}`}>7</span>
+                    <p className="max-sm:hidden">Health Packages</p>
+                </li>
+                
+                <li className={`flex items-center cursor-pointer ${activeStep === 8 ? "text-blue-600" : ""}`} onClick={() => setActiveStep(9)}>
+                    <span className={`flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 9 ? "border-blue-600" : "border-gray-500"}`}>9</span>
+                    <p className="max-sm:hidden">Submit</p>
                 </li>
             </ol>
 
@@ -123,5 +249,10 @@ function HospitalFormNavbar() {
         </>
     );
 }
+
+{/* <li className={`flex items-center cursor-pointer ${activeStep === 8 ? "text-blue-600" : ""}`} onClick={() => setActiveStep(8)}>
+                    <span className={`flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 8 ? "border-blue-600" : "border-gray-500"}`}>8</span>
+                    <p className="max-sm:hidden">Add Images</p>
+                </li> */}
 
 export default HospitalFormNavbar;

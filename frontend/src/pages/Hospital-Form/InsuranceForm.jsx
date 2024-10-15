@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-function InsuranceForm({check}) {
+function InsuranceForm({ data ,check }) {
   const [insuranceID, setInsuranceID] = useState(2);
 
   const [insuranceData, setInsuranceData] = useState([
@@ -9,13 +9,21 @@ function InsuranceForm({check}) {
       insurance_company: '',
       contact_info: '',
       insurance_type_id: '',
+      insurance_type: '',
+      cashless: false,
     },
   ]);
 
+//   useEffect(() => {
+//     if (data) {
+//       setInsuranceData(data); // Preload the form data when available
+//     }
+// }, [data]);
+
   const handleChange = (index, e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     const updatedData = [...insuranceData];
-    updatedData[index][name] = value;
+    updatedData[index][name] = type === 'checkbox' ? checked : value;
     setInsuranceData(updatedData);
   };
 
@@ -23,14 +31,15 @@ function InsuranceForm({check}) {
     setInsuranceData([
       ...insuranceData,
       {
-        id: 'INS'+insuranceID,
+        id: 'INS' + insuranceID,
         insurance_company: '',
         contact_info: '',
         insurance_type_id: '',
+        insurance_type: '',
+        cashless: false,
       },
     ]);
-
-    setInsuranceID(insuranceID+1);
+    setInsuranceID(insuranceID + 1);
   };
 
   const deleteInsuranceForm = (index) => {
@@ -41,7 +50,7 @@ function InsuranceForm({check}) {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(insuranceData); 
-    check(insuranceData);
+    check(insuranceData,7);
   };
 
   return (
@@ -91,6 +100,33 @@ function InsuranceForm({check}) {
                     onChange={(e) => handleChange(index, e)}
                     className="w-full p-3 border border-gray-300 rounded-md"
                     placeholder="Enter contact info (optional)"
+                  />
+                </div>
+
+                <div className="col-span-1">
+                  <label className="block text-sm font-semibold mb-2" htmlFor={`insurance_type_${index}`}>
+                    Insurance Type
+                  </label>
+                  <input
+                    type="text"
+                    name="insurance_type"
+                    value={data.insurance_type}
+                    onChange={(e) => handleChange(index, e)}
+                    className="w-full p-3 border border-gray-300 rounded-md"
+                    placeholder="Enter insurance type"
+                  />
+                </div>
+
+                <div className="col-span-1">
+                  <label className="block text-sm font-semibold mb-2" htmlFor={`cashless_${index}`}>
+                    Cashless
+                  </label>
+                  <input
+                    type="checkbox"
+                    name="cashless"
+                    checked={data.cashless}
+                    onChange={(e) => handleChange(index, e)}
+                    className="w-6 h-6"
                   />
                 </div>
 

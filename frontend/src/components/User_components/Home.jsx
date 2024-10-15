@@ -1,10 +1,9 @@
 import React from "react";
-import './Home.css';
+
 import HospitalList from "./HospitalList";
-import HospitalCard from "./HospitalCard";
-import Map from "./Map";
-import Footer from "./Footer";
-import Navbar from "./Navbar";
+import Map from "../Map";
+import Footer from "../Footer";
+import Navbar from "../Navbar";
 
 function Home() {
   return (

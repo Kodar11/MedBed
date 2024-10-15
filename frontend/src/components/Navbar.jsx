@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
+import {Navigate, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [nav, setNav] = useState(false);
+
+  const navigate = useNavigate()
 
   const handleNav = () => {
     setNav(!nav);
@@ -13,6 +16,10 @@ const Navbar = () => {
     { id: 4, text: 'About' },
     { id: 5, text: 'Contact' },
   ];
+
+  const handleSubmit = () => {
+    navigate("/hospital-login")
+  }
 
   return (
     <div className='bg-[#0069d9] flex justify-between items-center h-20 max-w-screen mx-auto px-4 text-white'>
@@ -30,9 +37,11 @@ const Navbar = () => {
           </li>
         ))}
       </ul>
+      <button className='p-4 hover:bg-[#fdfdff] rounded-3xl m-2 cursor-pointer duration-300 hover:text-black' onClick={handleSubmit}>Login</button>
       <div>
         <input type="text" className="h-12 m-4 max-sm:w-3/4 max-md:w-2/3 rounded-lg p-2 text-black" placeholder="Search Hospitals" />
       </div>
+      
 
       {/* Mobile Navigation Icon */}
       <div onClick={handleNav} className='block md:hidden'>

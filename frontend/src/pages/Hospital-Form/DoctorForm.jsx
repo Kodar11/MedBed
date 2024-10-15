@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-function DoctorForm({ check }) {
+function DoctorForm({ data, check }) {
   const [docNo, setDocNo] = useState(2);
 
   const [doctorData, setDoctorData] = useState([
@@ -14,6 +14,12 @@ function DoctorForm({ check }) {
       contact_info: '',
     },
   ]);
+
+//   useEffect(() => {
+//     if (data) {
+//       setDoctorData(data); // Preload the form data when available
+//     }  
+// }, [data]);
 
   const handleChange = (index, e) => {
     const updatedDoctorData = [...doctorData];
@@ -46,7 +52,7 @@ function DoctorForm({ check }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (check) {
-      check(doctorData);
+      check(doctorData,4);
     } else {
       console.error("onSubmit is not defined.");
     }
