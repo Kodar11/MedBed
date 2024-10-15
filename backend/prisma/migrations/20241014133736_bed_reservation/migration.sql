@@ -11,6 +11,19 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
+CREATE TABLE "BedReservation" (
+    "id" VARCHAR(255) NOT NULL,
+    "paymentId" VARCHAR(255) NOT NULL,
+    "reservationTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "checkInTime" TIMESTAMP(3) NOT NULL DEFAULT (now() + interval '2 hours'),
+    "check_in" BOOLEAN NOT NULL DEFAULT false,
+    "late_patient" BOOLEAN NOT NULL DEFAULT false,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "BedReservation_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "UserInsurance" (
     "id" VARCHAR(255) NOT NULL,
     "insurance_company" VARCHAR(255) NOT NULL,
@@ -40,6 +53,16 @@ CREATE TABLE "Hospital" (
     "subImages" TEXT[],
 
     CONSTRAINT "Hospital_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Customization" (
+    "id" VARCHAR(255) NOT NULL,
+    "hospital_id" VARCHAR(255) NOT NULL,
+    "active_Service" BOOLEAN NOT NULL DEFAULT true,
+    "deposit_Amount" INTEGER NOT NULL,
+
+    CONSTRAINT "Customization_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -154,10 +177,16 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE INDEX "BedReservation_userId_idx" ON "BedReservation"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Hospital_email_key" ON "Hospital"("email");
 
 -- AddForeignKey
-ALTER TABLE "UserInsurance" ADD CONSTRAINT "UserInsurance_id_fkey" FOREIGN KEY ("id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BedReservation" ADD CONSTRAINT "BedReservation_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Customization" ADD CONSTRAINT "Customization_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "BedInfo" ADD CONSTRAINT "BedInfo_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -182,6 +211,3 @@ ALTER TABLE "PatientTestimonial" ADD CONSTRAINT "PatientTestimonial_hospital_id_
 
 -- AddForeignKey
 ALTER TABLE "HealthPackage" ADD CONSTRAINT "HealthPackage_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Ambulance" ADD CONSTRAINT "Ambulance_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;

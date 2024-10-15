@@ -8,66 +8,88 @@ datasource db {
 }
 
 model User {
-  id            String  @id @default(uuid()) @db.VarChar(255)
-  username      String  @unique @db.VarChar(255)
-  email         String  @unique @db.VarChar(255)
-  password      String  @db.VarChar(255)
-  phone_number  String  @db.VarChar(255)
-  refresh_token String? @db.VarChar(255)
-} 
+  id               String           @id @default(uuid()) @db.VarChar(255)
+  username         String           @unique @db.VarChar(255)
+  email            String           @unique @db.VarChar(255)
+  password         String           @db.VarChar(255)
+  phone_number     String           @db.VarChar(255)
+  refresh_token    String?          @db.VarChar(255)
+  
+  // New relation field for bed reservations
+  bedReservations  BedReservation[] // One user can have many bed reservations
+}
 
+model BedReservation {
+  id                 String   @id @default(uuid()) @db.VarChar(255)
+  paymentId          String   @db.VarChar(255)     // Stores the payment ID from Razorpay or another payment provider
+  reservationTime    DateTime @default(now())      // The time when the bed was reserved
+  checkInTime        DateTime @default(dbgenerated("(now() + interval '2 hours')")) // Set 2 hours later after reservation
+  check_in           Boolean  @default(false)      // Default false, changes when patient checks in
+  late_patient       Boolean  @default(false)      // Default false, set true if patient is late
+  userId             String                        // Foreign key connected to the User table
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])                               // Indexing userId for efficient querying
+}
 
 
 model UserInsurance {
-  id               String        @id @default(uuid()) @db.VarChar(255)
-  insurance_company String       @db.VarChar(255)
-  insurance_type_id String       @db.VarChar(255)
+  id                String   @id @default(uuid()) @db.VarChar(255)
+  insurance_company String   @db.VarChar(255)
+  insurance_type_id String   @db.VarChar(255)
   valid_till        DateTime
-  policy_number     String        @db.VarChar(255)
-  coverage_amount   Decimal       
-  
+  policy_number     String   @db.VarChar(255)
+  coverage_amount   Decimal
+
   // user              User?         @relation(fields: [id], references: [id])
 }
 
 model Hospital {
-  id               String   @id @default(uuid()) @db.VarChar(255)
-  name             String   @db.VarChar(255)
-  address          String   @db.VarChar(255)
-  city             String   @db.VarChar(255)
-  state            String   @db.VarChar(255)
-  zip_code         String   @db.VarChar(255)
-  contact_number   String   @db.VarChar(255)
-  email            String?  @unique @db.VarChar(255)
-  website          String?  @db.VarChar(255)
-  type             String   @db.VarChar(255)
-  accreditation    String?  @db.VarChar(255)
-  account_number   String?  @db.VarChar(255)
+  id             String  @id @default(uuid()) @db.VarChar(255)
+  name           String  @db.VarChar(255)
+  address        String  @db.VarChar(255)
+  city           String  @db.VarChar(255)
+  state          String  @db.VarChar(255)
+  zip_code       String  @db.VarChar(255)
+  contact_number String  @db.VarChar(255)
+  email          String? @unique @db.VarChar(255)
+  website        String? @db.VarChar(255)
+  type           String  @db.VarChar(255)
+  accreditation  String? @db.VarChar(255)
+  account_number String? @db.VarChar(255)
 
   // New fields for images
-  mainImage        String?  @db.VarChar(255) // URL for the main image
-  subImages        String[]  // Array of URLs for sub-images
 
   // Relations
-  BedInfos         BedInfo[]
-  Doctors          Doctor[]
-  MedicalEquipments MedicalEquipment[]
-  Services         Service[]
-  Insurances       Insurance[]
+  BedInfos            BedInfo[]
+  Doctors             Doctor[]
+  MedicalEquipments   MedicalEquipment[]
+  Services            Service[]
+  Insurances          Insurance[]
   PatientTestimonials PatientTestimonial[]
-  HealthPackages   HealthPackage[]
+  HealthPackages      HealthPackage[]
+  Customization       Customization[]
 }
 
+model Customization {
+  id             String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id    String  @db.VarChar(255)
+  active_Service Boolean @default(true)
+  deposit_Amount Int
+
+  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+}
 
 model BedInfo {
-  id            String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id   String  @db.VarChar(255)
-  total_beds    Int
-  bed_type      String  @db.VarChar(255)
+  id             String   @id @default(uuid()) @db.VarChar(255)
+  hospital_id    String   @db.VarChar(255)
+  total_beds     Int
+  bed_type       String   @db.VarChar(255)
   available_beds Int
-  price         Decimal?
-  live_bedcount Int
+  price          Decimal?
+  live_bedcount  Int
 
-  hospital      Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model Doctor {
@@ -80,28 +102,28 @@ model Doctor {
   availability     String  @db.VarChar(255)
   contact_info     String? @db.VarChar(255)
 
-  hospital         Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model MedicalEquipment {
-  id                 String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id        String  @db.VarChar(255)
-  equipment_name     String  @db.VarChar(255)
-  equipment_type     String  @db.VarChar(255)
-  availability       Boolean
-  certification_status String?  @db.VarChar(255)
+  id                   String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id          String  @db.VarChar(255)
+  equipment_name       String  @db.VarChar(255)
+  equipment_type       String  @db.VarChar(255)
+  availability         Boolean
+  certification_status String? @db.VarChar(255)
 
-  hospital           Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model Service {
-  id               String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id      String  @db.VarChar(255)
-  service_name     String  @db.VarChar(255)
+  id                  String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id         String  @db.VarChar(255)
+  service_name        String  @db.VarChar(255)
   service_description String? @db.VarChar(255) // Renamed from description
-  availability     Boolean
+  availability        Boolean
 
-  hospital         Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model Insurance {
@@ -110,45 +132,45 @@ model Insurance {
   insurance_company String  @db.VarChar(255)
   contact_info     String? @db.VarChar(255)
   insurance_type_id String  @db.VarChar(255)
-
-  hospital         Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
-  insurance_type   InsuranceType @relation(fields: [insurance_type_id], references: [id])
-}
-
-model InsuranceType {
-  id              String  @id @default(uuid()) @db.VarChar(255)
-  insurance_type  String  @db.VarChar(255)
   cashless        Boolean
 
-  Insurances      Insurance[]
+  hospital         Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  //insurance_type   InsuranceType @relation(fields: [insurance_type_id], references: [id])
 }
 
-model PatientTestimonial {
-  id              String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id     String  @db.VarChar(255)
-  patient_name    String  @db.VarChar(255)
-  feedback        String  @db.VarChar(255)
-  rating          Int?    // optional, 1-5 scale
+//model InsuranceType {
+//  id              String  @id @default(uuid()) @db.VarChar(255)
+//  insurance_type  String  @db.VarChar(255)
+//  cashless        Boolean
 
-  hospital        Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+//  Insurances      Insurance[]
+//}
+model PatientTestimonial {
+  id           String @id @default(uuid()) @db.VarChar(255)
+  hospital_id  String @db.VarChar(255)
+  patient_name String @db.VarChar(255)
+  feedback     String @db.VarChar(255)
+  rating       Int? // optional, 1-5 scale
+
+  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model HealthPackage {
-  id              String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id     String  @db.VarChar(255)
-  package_name    String  @db.VarChar(255)
+  id                  String  @id @default(uuid()) @db.VarChar(255)
+  hospital_id         String  @db.VarChar(255)
+  package_name        String  @db.VarChar(255)
   package_description String? @db.VarChar(255) // Renamed from description
-  package_price   Decimal // Renamed from price
+  package_price       Decimal // Renamed from price
 
-  hospital        Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model Ambulance {
-  id        String      @id @default(uuid())
-  hospital_id String  @db.VarChar(255)
-  type      String   @db.VarChar(255)
-  capacity  Int
-  equipment String[]                      
-  location  String   @db.VarChar(255)
-  status    String   @default("Available") 
+  id          String   @id @default(uuid())
+  hospital_id String   @db.VarChar(255)
+  type        String   @db.VarChar(255)
+  capacity    Int
+  equipment   String[]
+  location    String   @db.VarChar(255)
+  status      String   @default("Available")
 }

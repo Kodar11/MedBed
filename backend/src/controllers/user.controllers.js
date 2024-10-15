@@ -47,7 +47,7 @@ function generateRefreshToken(user) {
 // Function to create a new user
 async function createUser(data) {
   const hashedPassword = await hashPassword(data.password);
-  
+
   return await prisma.user.create({
     data: {
       ...data,
@@ -66,15 +66,8 @@ const generateAccessAndRefreshTokens = async (userId) => {
       throw new ApiError(404, "User not found");
     }
 
-    // Log user details
-    console.log("User found:", user);
-
-    const accessToken = generateAccessToken(user); 
-    const refreshToken = generateRefreshToken(user); 
-
-    // Log generated tokens
-    console.log("Access Token:", accessToken);
-    console.log("Refresh Token:", refreshToken);
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
     await prisma.user.update({
       where: { id: userId },
@@ -177,9 +170,10 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true, 
+    secure: true,
     sameSite: "lax"
   };
+
 
   res.cookie("accessToken", accessToken, options);
   return res.status(200).json(
@@ -200,7 +194,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true, 
+    secure: true,
   };
 
   return res
@@ -210,66 +204,115 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 
-const sendPaymentInfoToHospital = asyncHandler(async (req, res) => {
-  // const { userId, paymentId, paymentDoneTime } = req.body;
+const sendPaymentInfo = asyncHandler(async (req, res) => {
 
-  // // Validate input fields
-  // if (!userId || !paymentId || !paymentDoneTime) {
-  //   throw new ApiError(400, "All fields are required");
-  // }
-
-  const { userId } = req.body;
-    
+  const { reservationId } = req.body;
 
   // Validate input fields
-  if (!userId) {
-    throw new ApiError(400, "User ID is required");
+  if (!reservationId) {
+    throw new ApiError(400, "Reservation ID is required");
   }
 
-  // Hard-coded payment details for testing
-  const paymentId = "test_payment_id_12345"; // Replace with your test payment ID
-  const paymentDoneTime = new Date().toISOString(); // Current time in ISO format 
-
-  // Fetch user information based on userId
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
+  // Fetch bed reservation based on reservationId, ensure bed_reservation_time and checkInTime are included
+  const bedReservation = await prisma.bedReservation.findUnique({
+    where: { id: reservationId },
     select: {
-      username: true,
-      email: true,
-      phone_number: true,
+      paymentId: true,
+      reservationTime: true,   // Correct field name
+      checkInTime: true,       // Use camelCase instead of snake_case
+      late_patient: true,
+      user: {
+        select: {
+          username: true,
+          email: true,
+          phone_number: true,
+        },
+      },
     },
   });
 
-  if (!user) {
-    throw new ApiError(404, "User not found");
+  if (!bedReservation) {
+    throw new ApiError(404, "Bed reservation not found");
   }
 
-  // Construct the payload to send to the hospital
-  const hospitalPayload = {
+  const { user, paymentId, reservationTime, checkInTime, late_patient } = bedReservation;
+
+  // Get the current time
+  const currentTime = new Date();
+
+  // Check if the patient is late (current time is past the check-in time)
+  let isLatePatient = late_patient;
+  if (!late_patient && checkInTime && currentTime > checkInTime) {
+    // Update late_patient to true if the current time has passed the check-in time
+    await prisma.bedReservation.update({
+      where: { id: reservationId },
+      data: { late_patient: true },
+    });
+    isLatePatient = true;
+  }
+
+  // Construct the payload to send to the hospital or user
+  const payload = {
     user_info: {
       username: user.username,
       email: user.email,
       phone_number: user.phone_number,
     },
     payment_id: paymentId,
-    payment_done_time: paymentDoneTime,
+    bed_reservation_time: reservationTime || "Not available", // Use a fallback if null
+    check_in_time: checkInTime || "Not yet checked in",        // Use a fallback if null
+    late_patient: isLatePatient,
   };
 
-  // Here you would typically send the data to the hospital's API or service
-  // For demonstration, we'll just log it
-  console.log("Sending payment info to hospital:", hospitalPayload);
-
-  // Assuming you have a function to send this data to the hospital
-  // await sendToHospital(hospitalPayload);
-
   // Respond with a success message
-  res.status(200).json({ message: "Payment information sent to hospital successfully" });
+  res.status(200).json(
+    new ApiResponse(200, payload, "Payment and bed reservation info sent successfully")
+  );
 });
+
+
+
+
+const createBedReservation = asyncHandler(async (req, res) => {
+  const { paymentId, userId } = req.body; // Expecting paymentId and userId in the request body
+
+  // Validate input fields
+  if (!paymentId || !userId) {
+    throw new ApiError(400, "Payment ID and User ID are required");
+  }
+
+  // Create a new bed reservation with the default values for check_in and late_patient
+  const newReservation = await prisma.bedReservation.create({
+    data: {
+      paymentId: paymentId,
+      reservationTime: new Date(), // Set to current time
+      checkInTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+      check_in: false, // Default false
+      late_patient: false, // Default false
+      userId: userId, // Associate with the user
+    },
+  });
+
+  // Construct the response payload
+  const payload = {
+    reservationId: newReservation.id,
+    paymentId: newReservation.paymentId,
+    reservationTime: newReservation.reservationTime,
+    checkInTime: newReservation.checkInTime,
+    check_in: newReservation.check_in,
+    late_patient: newReservation.late_patient,
+  };
+
+  // Respond with success message and reservation details
+  res.status(201).json(new ApiResponse(201, payload, "Payment successful and reservation created."));
+});
+
 
 
 export {
   registerUser,
   loginUser,
   logoutUser,
-  sendPaymentInfoToHospital
+  sendPaymentInfo,
+  createBedReservation
 };
