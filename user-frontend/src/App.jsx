@@ -4,6 +4,7 @@ import Login from "./Pages/Login"
 import Home from "./Pages/Home"
 import ReserveBed from "./Pages/ReserveBed"
 import ProtectedRoute from "./components/ProtectedRoute"
+import BedReservations from "./Pages/Reservation"
 
 function App() {
 
@@ -17,6 +18,9 @@ function App() {
           <Route path='/login' element={<Login />}></Route>
           <Route path='/reserveBed' element={
             <ProtectedRoute> <ReserveBed /> </ProtectedRoute>
+          }></Route>
+          <Route path='/reservations' element={
+            <ProtectedRoute> <BedReservations /> </ProtectedRoute>
           }></Route>
         </Routes>
       </BrowserRouter>

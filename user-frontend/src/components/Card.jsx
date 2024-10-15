@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';  // Assuming you're using react-router-dom for navigation
 import axios from 'axios';
-
+import Cookies from 'js-cookie'; // Import js-cookie library
+ 
 function Card() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
     const navigate = useNavigate();
 
     useEffect(() => {
+
+        const accessToken = Cookies.get('accessToken'); // Use js-cookie to get the cookie
+        console.log("Access Token from Cookies:", accessToken); // Log the access token
+
         // Function to update the screen size
         const handleResize = () => setScreenSize(window.innerWidth);
 
@@ -22,6 +27,7 @@ function Card() {
     // Function to handle reserve bed click
     const handleReserveBedClick = async () => {
         try {
+
             // Check if the user is authenticated by calling your backend
             const response = await axios.get('/api/auth/verify');  // Adjust the endpoint as needed
             if (response.status === 200) {

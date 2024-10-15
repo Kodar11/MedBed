@@ -6,6 +6,7 @@ function Home() {
   return (
     <>
         <NavBar/>
+        
         <Card/>
         <Card/>
         <Card/>
