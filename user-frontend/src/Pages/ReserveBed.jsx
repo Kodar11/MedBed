@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
+import { useNavigate, useParams } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
 const getCookie = (cookieName) => {
   const name = cookieName + "=";
@@ -15,8 +15,9 @@ const getCookie = (cookieName) => {
   return null;
 };
 
-const RazorpayPayment = ({ user }) => {
+const RazorpayPayment = () => { // Accept hospitalId as a prop
   const navigate = useNavigate(); // Initialize the navigate function
+  const {hospitalId} = useParams()
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -68,6 +69,7 @@ const RazorpayPayment = ({ user }) => {
         axios.post("http://localhost:3000/api/v1/users/create-bed-reservation", {
           paymentId: response.razorpay_payment_id, // Payment ID from Razorpay
           userId: userId, // Extracted userId from the token
+          hospitalId: hospitalId, // Pass the hospitalId
         }, {
           headers: {
             Authorization: `Bearer ${accessToken}`, // Bearer token from cookies
@@ -84,9 +86,9 @@ const RazorpayPayment = ({ user }) => {
           });
       },
       prefill: {
-        name: decodeToken.name, // Prefill user details
-        email: decodeToken.email,
-        contact: decodeToken.phone_number,
+        name: decodedToken.name, // Prefill user details
+        email: decodedToken.email,
+        contact: decodedToken.phone_number,
       },
       theme: {
         color: "#5A67D8", // Custom theme color

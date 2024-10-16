@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Import Link for navigation
+import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import axios from 'axios'; // Import axios for API requests
 
 function NavBar() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
+    const navigate = useNavigate(); // Initialize navigate for redirection
 
     useEffect(() => {
         // Function to update the screen size
@@ -17,6 +19,30 @@ function NavBar() {
         };
     }, []);
 
+    // Handle log out functionality
+    const handleLogOut = async () => {
+        try {
+            // Send a logout request to the server
+            await axios.post('http://localhost:3000/api/v1/users/logout', {}, { withCredentials: true });
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+
+        // Clear session and local storage
+        sessionStorage.clear();
+        localStorage.clear();
+
+        // Manage browser history to prevent going back to protected pages
+        history.back();
+        history.forward();
+        window.onpopstate = function () {
+            history.go(1);
+        };
+
+        // Redirect user to the login page
+        navigate("/login");
+    };
+
     return (
         <>
             {screenSize > 600 && (
@@ -25,7 +51,7 @@ function NavBar() {
                         <div className="text-xl font-semibold">MedBed</div>
                         <div className="flex gap-4 font-medium cursor-pointer">
                             <Link to="/reservations">Reservations</Link>
-                            <Link to="/logout">Logout</Link>
+                            <div onClick={handleLogOut} className="cursor-pointer">Logout</div> {/* Trigger logout on click */}
                         </div>
                     </div>
                     <div>
@@ -68,7 +94,7 @@ function NavBar() {
                             <div className="text-xl font-semibold">MedBed</div>
                             <div className="flex gap-4 font-medium cursor-pointer">
                                 <Link to="/reservations">Reservations</Link>
-                                <Link to="/logout">Logout</Link>
+                                <div onClick={handleLogOut} className="cursor-pointer">Logout</div> {/* Trigger logout on click */}
                             </div>
                         </div>
                     </nav>
