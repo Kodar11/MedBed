@@ -18,11 +18,17 @@ const HospitalCard = ({ hospital }) => {
         navigate(`/hospital-details/${hospital.hospital.id}`);
     };
 
+    const handleDirection = () => {
+        // Use navigate to go to the HospitalDetails page and pass the hospital ID as a URL parameter
+        navigate(`/hospital-directions/${hospital.hospital.id}`);
+    };
+
+
     return (
       <div>
         {!selectedHospitalId && (
-        <div onClick={handleClick} className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg p-6 max-w-4xl mx-auto my-4 shadow-lg flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
-            <div className="flex-2 text-center md:text-left">
+        <div  className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg p-6 max-w-4xl mx-auto my-4 shadow-lg flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+            <div onClick={handleClick} className="flex-2 text-center md:text-left">
                 <h2 className="text-xl md:text-2xl font-semibold mb-2 mr-4">
                     {hospital.hospital.name}
                 </h2>
@@ -60,6 +66,7 @@ const HospitalCard = ({ hospital }) => {
                             className="w-8 h-8"
                             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiEki7AnktD9BYXtKqziv3msZEVk_kOBlK8A&s"
                             alt="Directions"
+                            onClick={handleDirection}
                         />
                     </div>
                     <p className="text-sm">Directions & Navigation</p>

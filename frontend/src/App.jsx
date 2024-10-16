@@ -19,6 +19,7 @@ import Home from './components/User_components/Home'
 import HospitalDetails from './pages/Hospital_Info/HospitalDetails';
 import HospitalLogin from './pages/HospitalLogin'
 import HospitalHome from './pages/HospitalHome'
+import HospitalDirection from './components/User_components/HospitalDirection'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -43,6 +44,7 @@ function App() {
           {/* <Route path="/user-login" element={<UserLogin />} /> */}
         <Route path="/hospital-login" element={<HospitalLogin />} />
         <Route path="/hospital-form" element={<HospitalFormNavbar />} />
+        <Route path="/hospital-directions/:hospitalId" element={<HospitalDirection/>} />
         </Routes>
     </BrowserRouter>
     </>

@@ -174,3 +174,8 @@ model Ambulance {
   location    String   @db.VarChar(255)
   status      String   @default("Available")
 }
+
+model Location {
+    id        String    @id @default(uuid())
+    name      String
+}

@@ -49,8 +49,6 @@ CREATE TABLE "Hospital" (
     "type" VARCHAR(255) NOT NULL,
     "accreditation" VARCHAR(255),
     "account_number" VARCHAR(255),
-    "mainImage" VARCHAR(255),
-    "subImages" TEXT[],
 
     CONSTRAINT "Hospital_pkey" PRIMARY KEY ("id")
 );
@@ -122,17 +120,9 @@ CREATE TABLE "Insurance" (
     "insurance_company" VARCHAR(255) NOT NULL,
     "contact_info" VARCHAR(255),
     "insurance_type_id" VARCHAR(255) NOT NULL,
-
-    CONSTRAINT "Insurance_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "InsuranceType" (
-    "id" VARCHAR(255) NOT NULL,
-    "insurance_type" VARCHAR(255) NOT NULL,
     "cashless" BOOLEAN NOT NULL,
 
-    CONSTRAINT "InsuranceType_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Insurance_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -170,6 +160,14 @@ CREATE TABLE "Ambulance" (
     CONSTRAINT "Ambulance_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Location" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "Location_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
@@ -202,9 +200,6 @@ ALTER TABLE "Service" ADD CONSTRAINT "Service_hospital_id_fkey" FOREIGN KEY ("ho
 
 -- AddForeignKey
 ALTER TABLE "Insurance" ADD CONSTRAINT "Insurance_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Insurance" ADD CONSTRAINT "Insurance_insurance_type_id_fkey" FOREIGN KEY ("insurance_type_id") REFERENCES "InsuranceType"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PatientTestimonial" ADD CONSTRAINT "PatientTestimonial_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;

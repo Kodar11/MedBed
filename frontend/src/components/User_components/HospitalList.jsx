@@ -15,7 +15,7 @@ const HospitalList = () => {
         const response = await axios.get('http://localhost:3000/api/v1/hospitals/getAllHospitals');
         setHospitals(response.data); // Assuming the API returns a list of hospitals
         setLoading(false);
-        console.log(response.data);
+        // console.log(response.data);
       } catch (error) {
         console.error('Error fetching hospital data:', error);
         setLoading(false);
