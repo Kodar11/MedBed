@@ -1,68 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 const HospitalHome = () => {
-  const [formData, setFormData] = useState({
-    service: true,
-    noOfBeds: '',
-    depositMoney: ''
-  });
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [patients, setpatients] = useState([]);
+  useEffect(() => {
+    const fetchReservations = async () => {
+      try {
+        setLoading(true);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+        // Fetch reservations without authentication
+        const { data } = await axios.get(`http://localhost:3000/api/v1/users/send-payment-info`);
 
-  const handleUpdate = () => {
-    
-    alert("Updated!");
-  };
+        // Handle the received data
+        if (data && data.data) {
+          setReservations([data.data]); // Wrap the object in an array
+        } else {
+          setReservations([]);
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching reservation data:", error?.response?.data?.message || error);
+        setLoading(false);
+      }
+    };
+
+    fetchReservations();
+  }, []); // Empty dependency array to run this only on component mount
+
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <div className='min-h-screen flex flex-col items-center'>
-      <div className=" lg:w-1/2 w-full bg-white border border-gray-200 rounded-lg shadow-xl p-4 mb-6 lg:mb-0 max-sm:p-2 max-sm:mb-4">
-              <h3 className="text-xl font-semibold bg-indigo-100 text-indigo-700 py-2 px-4 rounded-t-lg max-sm:text-lg max-sm:text-center max-sm:px-2">
-                Patients
-              </h3>
-              <div className="max-h-[26rem] overflow-y-auto p-4 max-sm:p-2">
-                
-                  <ul className="space-y-4 max-sm:space-y-2">
-                    {patients.map((patient) => (
-                      <li key={patient._id} className="bg-gray-100 p-4 rounded-lg shadow max-sm:p-2">
-                        <div className="flex justify-between items-center max-sm:flex-col">
-                          <div className="text-left max-sm:mb-2">
-                            <h4 className="font-semibold text-lg max-sm:text-base text-left ">Problem: {patient.issue}</h4>
-                            <p className="text-gray-600 max-sm:text-sm text-left">Description: {patient.description}</p>
-                            <p className="text-gray-600 max-sm:text-sm text-left">Address: {patient.address}</p>
-                          </div>
-                          {(patient.acknowledge_at == "") && (
-                              <button
-                                onClick={() => handleAcknowledge(patient._id)}
-                                className="bg-green-500 text-white text-base px-4 py-2 rounded-lg hover:bg-green-600 max-sm:px-2 max-sm:py-1 "
-                              >
-                                Arrived
-                              </button>
-                            )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-               
-              </div>
-            </div>
+    <div className="p-4 flex justify-center min-h-screen bg-gray-100">
+      <div className="lg:w-1/2 w-full bg-white border border-gray-200 rounded-lg shadow-xl p-4 max-sm:p-2">
+        <h3 className="text-xl font-semibold bg-indigo-100 text-indigo-700 py-2 px-4 rounded-t-lg max-sm:text-lg max-sm:px-2">
+          Bed Reservations
+        </h3>
+        <div className="max-h-[28rem] overflow-y-auto p-4 max-sm:p-2">
+          {reservations.length > 0 ? (
+            <ul className="space-y-4 max-sm:space-y-2">
+              {reservations.map((reservation, index) => {
+                // Ensure reservation exists before rendering
+                if (!reservation) return null;
 
-    
-    
-
+                return (
+                  <li key={reservation.payment_id || index} className="bg-gray-100 p-4 rounded-lg shadow max-sm:p-2">
+                    <div className="flex justify-between items-center max-sm:flex-col">
+                      <div className="max-sm:mb-2">
+                        <h4 className="font-semibold text-lg max-sm:text-base">
+                          Payment ID: {reservation.paymentId || "Not available"}
+                        </h4>
+                        <p className="text-gray-600 max-sm:text-sm">
+                          Bed Reservation Time: {reservation.reservationTime
+                            ? new Date(reservation.reservationTime).toLocaleString()
+                            : "Not available"}
+                        </p>
+                        <p className="text-gray-600 max-sm:text-sm">
+                          Check-In Time: {reservation.checkInTime
+                            ? new Date(reservation.checkInTime).toLocaleString()
+                            : "Not yet checked in"}
+                        </p>
+                        <p className="text-gray-600 max-sm:text-sm">
+                          Late Patient: {reservation.late_patient ? "Yes" : "No"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-gray-500 max-sm:text-sm">
+                      <p>Username: {reservation.user?.username || "N/A"}</p>
+                      <p>Email: {reservation.user?.email || "N/A"}</p>
+                      <p>Phone Number: {reservation.user?.phone_number || "N/A"}</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="text-gray-600 max-sm:text-sm">No reservations</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
 
 export default HospitalHome;
-
-
-
-

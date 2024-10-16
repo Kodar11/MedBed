@@ -1,4 +1,3 @@
-// HospitalLogin.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +15,7 @@ function HospitalLogin() {
     
 
     if(hospitalId == "UIAMS" && password == "123456"){
-      navigate("/hospital-form");
+      navigate("/hospital-home");
     }
     
   };
