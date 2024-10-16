@@ -205,73 +205,85 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const sendPaymentInfo = asyncHandler(async (req, res) => {
+  try {
+    const { id: userId } = req.params; // Now getting userId from request params
 
-  const { reservationId } = req.body;
+    // Validate input fields
+    if (!userId) {
+      throw new ApiError(400, "User ID is required");
+    }
 
-  // Validate input fields
-  if (!reservationId) {
-    throw new ApiError(400, "Reservation ID is required");
-  }
+    console.log("Fetching bed reservation for user ID:", userId);
 
-  // Fetch bed reservation based on reservationId, ensure bed_reservation_time and checkInTime are included
-  const bedReservation = await prisma.bedReservation.findUnique({
-    where: { id: reservationId },
-    select: {
-      paymentId: true,
-      reservationTime: true,   // Correct field name
-      checkInTime: true,       // Use camelCase instead of snake_case
-      late_patient: true,
-      user: {
-        select: {
-          username: true,
-          email: true,
-          phone_number: true,
+    // Fetch the bed reservation based on userId
+    const bedReservation = await prisma.bedReservation.findFirst({
+      where: { userId: userId },  // Query using userId
+      select: {
+        id: true,                 // Include the reservation ID as well
+        paymentId: true,
+        reservationTime: true,    // Correct field name
+        checkInTime: true,        // Use camelCase instead of snake_case
+        late_patient: true,
+        user: {
+          select: {
+            username: true,
+            email: true,
+            phone_number: true,
+          },
         },
       },
-    },
-  });
-
-  if (!bedReservation) {
-    throw new ApiError(404, "Bed reservation not found");
-  }
-
-  const { user, paymentId, reservationTime, checkInTime, late_patient } = bedReservation;
-
-  // Get the current time
-  const currentTime = new Date();
-
-  // Check if the patient is late (current time is past the check-in time)
-  let isLatePatient = late_patient;
-  if (!late_patient && checkInTime && currentTime > checkInTime) {
-    // Update late_patient to true if the current time has passed the check-in time
-    await prisma.bedReservation.update({
-      where: { id: reservationId },
-      data: { late_patient: true },
     });
-    isLatePatient = true;
+
+    if (!bedReservation) {
+      throw new ApiError(404, "Bed reservation not found");
+    }
+
+    console.log("Bed reservation found:", bedReservation);
+
+    const { id: reservationId, user, paymentId, reservationTime, checkInTime, late_patient } = bedReservation;
+
+    // Get the current time
+    const currentTime = new Date();
+
+    // Check if the patient is late (current time is past the check-in time)
+    let isLatePatient = late_patient;
+    if (!late_patient && checkInTime && currentTime > checkInTime) {
+      console.log("Patient is late, updating late_patient field...");
+      // Update late_patient to true if the current time has passed the check-in time
+      await prisma.bedReservation.update({
+        where: { id: reservationId },
+        data: { late_patient: true },
+      });
+      isLatePatient = true;
+    }
+
+    // Construct the payload to send to the hospital or user
+    const payload = {
+      reservation_id: reservationId,  // Include the reservation ID in the payload
+      user_info: {
+        username: user.username,
+        email: user.email,
+        phone_number: user.phone_number,
+      },
+      payment_id: paymentId,
+      bed_reservation_time: reservationTime || "Not available", // Use a fallback if null
+      check_in_time: checkInTime || "Not yet checked in",        // Use a fallback if null
+      late_patient: isLatePatient,
+    };
+
+    // Respond with a success message
+    console.log("Sending response with payload:", payload);
+    res.status(200).json(
+      new ApiResponse(200, payload, "Payment and bed reservation info sent successfully")
+    );
+
+  } catch (error) {
+    console.error("Error in sendPaymentInfo:", error); // Log the error to the console
+    res.status(500).json({
+      message: error.message || "Internal Server Error",
+    });
   }
-
-  // Construct the payload to send to the hospital or user
-  const payload = {
-    user_info: {
-      username: user.username,
-      email: user.email,
-      phone_number: user.phone_number,
-    },
-    payment_id: paymentId,
-    bed_reservation_time: reservationTime || "Not available", // Use a fallback if null
-    check_in_time: checkInTime || "Not yet checked in",        // Use a fallback if null
-    late_patient: isLatePatient,
-  };
-
-  // Respond with a success message
-  res.status(200).json(
-    new ApiResponse(200, payload, "Payment and bed reservation info sent successfully")
-  );
 });
-
-
-
 
 const createBedReservation = asyncHandler(async (req, res) => {
   const { paymentId, userId } = req.body; // Expecting paymentId and userId in the request body
@@ -295,7 +307,7 @@ const createBedReservation = asyncHandler(async (req, res) => {
 
   // Construct the response payload
   const payload = {
-    reservationId: newReservation.id,
+    id: newReservation.id,
     paymentId: newReservation.paymentId,
     reservationTime: newReservation.reservationTime,
     checkInTime: newReservation.checkInTime,
@@ -306,8 +318,6 @@ const createBedReservation = asyncHandler(async (req, res) => {
   // Respond with success message and reservation details
   res.status(201).json(new ApiResponse(201, payload, "Payment successful and reservation created."));
 });
-
-
 
 export {
   registerUser,

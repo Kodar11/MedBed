@@ -1,6 +1,24 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+// Function to get a cookie by name
+const getCookie = (cookieName) => {
+  const name = cookieName + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cookieArray = decodedCookie.split(';');
+  for (let i = 0; i < cookieArray.length; i++) {
+    let cookie = cookieArray[i].trim();
+    if (cookie.indexOf(name) === 0) {
+      return cookie.substring(name.length, cookie.length);
+    }
+  }
+  return null;
+};
+const decodeToken = (token) => {
+  const payload = token.split('.')[1];
+  return JSON.parse(atob(payload));
+};
+
 const BedReservations = () => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,22 +27,45 @@ const BedReservations = () => {
     const fetchReservations = async () => {
       try {
         setLoading(true);
-        // Replace with your actual API endpoint and reservation ID
-        const { data } = await axios.post("https://localhost:3000/api/v1/users/send-payment-info", {
-          reservationId: "be2da687-90c3-49ad-9f86-1247eb82b8e0", // Dynamically set the reservation ID
-        });
 
-        // Assuming the response structure has `data` containing the reservation details
-        setReservations([data.payload]); // Set the reservation data from API response
+        // Get the access token from the cookie
+        const accessToken = getCookie("accessToken");
+
+        if (!accessToken) {
+          console.error("Access token not found");
+          setLoading(false);
+          return;
+        }
+
+        // Decode the access token to get userId
+        const decodedToken = decodeToken(accessToken);
+        const userId = decodedToken?.id;
+
+        if (!userId) {
+          console.error("User ID not found in token");
+          setLoading(false);
+          return;
+        }
+
+        // Fetch reservations based on the userId
+        const { data } = await axios.get(`http://localhost:3000/api/v1/users/send-payment-info/${userId}`);
+        
+        // Handle the received data
+        if (data && data.data) {
+          setReservations([data.data]); // Wrap the object in an array
+        } else {
+          setReservations([]);
+        }
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching reservation data:", error?.response?.data?.message || error);
-        setLoading(false); // Proceed to load UI even on error
+        setLoading(false);
       }
     };
 
     fetchReservations();
-  }, []);
+  }, []); // Empty dependency array to run this only on component mount
 
   if (loading) return <p>Loading...</p>;
 
@@ -37,35 +78,40 @@ const BedReservations = () => {
         <div className="max-h-[28rem] overflow-y-auto p-4 max-sm:p-2">
           {reservations.length > 0 ? (
             <ul className="space-y-4 max-sm:space-y-2">
-              {reservations.map((reservation) => (
-                <li key={reservation.payment_id} className="bg-gray-100 p-4 rounded-lg shadow max-sm:p-2">
-                  <div className="flex justify-between items-center max-sm:flex-col">
-                    <div className="max-sm:mb-2">
-                      <h4 className="font-semibold text-lg max-sm:text-base">
-                        Payment ID: {reservation.payment_id}
-                      </h4>
-                      <p className="text-gray-600 max-sm:text-sm">
-                        Bed Reservation Time: {reservation.bed_reservation_time
-                          ? new Date(reservation.bed_reservation_time).toLocaleString()
-                          : "Not available"}
-                      </p>
-                      <p className="text-gray-600 max-sm:text-sm">
-                        Check-In Time: {reservation.check_in_time
-                          ? new Date(reservation.check_in_time).toLocaleString()
-                          : "Not yet checked in"}
-                      </p>
-                      <p className="text-gray-600 max-sm:text-sm">
-                        Late Patient: {reservation.late_patient ? "Yes" : "No"}
-                      </p>
+              {reservations.map((reservation, index) => {
+                // Ensure reservation exists before rendering
+                if (!reservation) return null;
+
+                return (
+                  <li key={reservation.payment_id || index} className="bg-gray-100 p-4 rounded-lg shadow max-sm:p-2">
+                    <div className="flex justify-between items-center max-sm:flex-col">
+                      <div className="max-sm:mb-2">
+                        <h4 className="font-semibold text-lg max-sm:text-base">
+                          Payment ID: {reservation.paymentId || "Not available"}
+                        </h4>
+                        <p className="text-gray-600 max-sm:text-sm">
+                          Bed Reservation Time: {reservation.reservationTime
+                            ? new Date(reservation.reservationTime).toLocaleString()
+                            : "Not available"}
+                        </p>
+                        <p className="text-gray-600 max-sm:text-sm">
+                          Check-In Time: {reservation.checkInTime
+                            ? new Date(reservation.checkInTime).toLocaleString()
+                            : "Not yet checked in"}
+                        </p>
+                        <p className="text-gray-600 max-sm:text-sm">
+                          Late Patient: {reservation.late_patient ? "Yes" : "No"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-gray-500 max-sm:text-sm">
-                    <p>Username: {reservation.user_info.username}</p>
-                    <p>Email: {reservation.user_info.email}</p>
-                    <p>Phone Number: {reservation.user_info.phone_number}</p>
-                  </div>
-                </li>
-              ))}
+                    <div className="text-gray-500 max-sm:text-sm">
+                      <p>Username: {reservation.user?.username || "N/A"}</p>
+                      <p>Email: {reservation.user?.email || "N/A"}</p>
+                      <p>Phone Number: {reservation.user?.phone_number || "N/A"}</p>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="text-gray-600 max-sm:text-sm">No reservations</p>
