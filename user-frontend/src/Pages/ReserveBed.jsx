@@ -1,7 +1,23 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
-const RazorpayPayment = () => {
+const getCookie = (cookieName) => {
+  const name = cookieName + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cookieArray = decodedCookie.split(';');
+  for (let i = 0; i < cookieArray.length; i++) {
+    let cookie = cookieArray[i].trim();
+    if (cookie.indexOf(name) === 0) {
+      return cookie.substring(name.length, cookie.length);
+    }
+  }
+  return null;
+};
+
+const RazorpayPayment = ({ user }) => {
+  const navigate = useNavigate(); // Initialize the navigate function
+
   useEffect(() => {
     const script = document.createElement('script');
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -13,82 +29,73 @@ const RazorpayPayment = () => {
     };
   }, []);
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+  const decodeToken = (token) => {
+    const payload = token.split('.')[1];
+    return JSON.parse(atob(payload));
   };
 
   const handlePayment = (e) => {
     e.preventDefault();
 
     if (!window.Razorpay) {
-        alert("Razorpay is not loaded. Please refresh the page.");
-        return;
+      alert("Razorpay is not loaded. Please refresh the page.");
+      return;
     }
 
-    // Get the access token directly from local storage
-    const accessToken = localStorage.getItem("accessToken") ? JSON.parse(localStorage.getItem("accessToken")) : null;
-    console.log("1",accessToken);
-
+    const accessToken = getCookie("accessToken");
     if (!accessToken) {
-        alert("User not logged in.");
-        return;
+      alert("User not logged in.");
+      return;
     }
 
-    // const user = JSON.parse(localStorage.getItem("user")); // Retrieve the full user object
-
-    // console.log("Raw user from localStorage:", user); // Log raw string
-    // console.log("Access Token:", accessToken); // Log the access token
-
-    if (!user || !user.id) {
-        alert("User not logged in.");
-        return;
+    // Decode the token to get userId, assuming JWT
+    const decodedToken = decodeToken(accessToken);
+    const userId = decodedToken?.id; // Extract userId from the token
+    if (!userId) {
+      alert("User ID is missing from the token.");
+      return;
     }
 
     const options = {
-        key: "rzp_test_xv68vPTt2yrHXB",
-        amount: "50000",  // ₹500 in paise
-        currency: "INR",
-        name: "MedBed",
-        description: "Bed Reservation Deposit",
-        image: "https://example.com/your_logo",  // Placeholder for a logo, replace with actual logo URL
-        handler: function (response) {
-            // After successful payment, make the Axios request to create a reservation
-            axios.post("/api/bed-reservation", {
-                paymentId: response.razorpay_payment_id,
-                userId: user.id,  // Send userId from localStorage
-            }, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`, // Send the token as Bearer token
-                },
-            })
-            .then(res => {
-                console.log("Reservation created:", res.data);
-                alert("Reservation successful!");
-            })
-            .catch(err => {
-                console.error("Error creating reservation:", err);
-                alert("Failed to create reservation. Please try again.");
-            });
-        },
-        prefill: {
-            name: user.username,  // Use logged-in user details
-            email: user.email,
-            contact: user.phone_number,
-        },
-        notes: {
-            address: "Razorpay Corporate Office"
-        },
-        theme: {
-            color: "#5A67D8"  // Subtle purple color
-        }
+      key: "rzp_test_xv68vPTt2yrHXB", // Replace with your Razorpay key
+      amount: "50000", // ₹500 in paise
+      currency: "INR",
+      name: "MedBed",
+      description: "Bed Reservation Deposit",
+      image: "https://example.com/your_logo", // Replace with actual logo URL
+      handler: function (response) {
+        // Payment was successful, now make the Axios request to create a reservation
+        axios.post("http://localhost:3000/api/v1/users/create-bed-reservation", {
+          paymentId: response.razorpay_payment_id, // Payment ID from Razorpay
+          userId: userId, // Extracted userId from the token
+        }, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`, // Bearer token from cookies
+          },
+        })
+          .then(res => {
+            console.log("Reservation created:", res.data);
+            alert("Reservation successful!");
+            navigate('/reservations'); // Navigate to the /reservations page after successful payment
+          })
+          .catch(err => {
+            console.error("Error creating reservation:", err);
+            alert("Failed to create reservation. Please try again.");
+          });
+      },
+      prefill: {
+        name: decodeToken.name, // Prefill user details
+        email: decodeToken.email,
+        contact: decodeToken.phone_number,
+      },
+      theme: {
+        color: "#5A67D8", // Custom theme color
+      },
     };
 
     const rzp1 = new window.Razorpay(options);
     rzp1.open();
-};
-
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-200 to-purple-200 p-6">
@@ -115,12 +122,13 @@ const RazorpayPayment = () => {
           *You will receive a full refund upon successful check-in.
         </p>
 
-        <div className="mt-8">
-          <p className="text-gray-500 text-sm">
-            By making this payment, you agree to our
-            <a href="#" className="text-blue-500 hover:underline ml-1">Terms & Conditions</a>.
-          </p>
-        </div>
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/')} // Navigate to home page on click
+          className="mt-6 bg-gray-600 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-gray-700 transition duration-300 ease-in-out"
+        >
+          Back to Home
+        </button>
       </div>
     </div>
   );

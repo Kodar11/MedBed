@@ -27,7 +27,9 @@ model BedReservation {
   check_in           Boolean  @default(false)      // Default false, changes when patient checks in
   late_patient       Boolean  @default(false)      // Default false, set true if patient is late
   userId             String                        // Foreign key connected to the User table
+  hospitalId         String
   user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hospital          Hospital  @relation(fields: [hospitalId],references: [id])
 
   @@index([userId])                               // Indexing userId for efficient querying
 }
@@ -69,6 +71,7 @@ model Hospital {
   PatientTestimonials PatientTestimonial[]
   HealthPackages      HealthPackage[]
   Customization       Customization[]
+  BedReservation      BedReservation[]
 }
 
 model Customization {

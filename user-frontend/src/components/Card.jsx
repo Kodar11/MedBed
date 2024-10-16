@@ -9,8 +9,7 @@ function Card() {
 
     useEffect(() => {
 
-        const accessToken = Cookies.get('accessToken'); // Use js-cookie to get the cookie
-        console.log("Access Token from Cookies:", accessToken); // Log the access token
+       
 
         // Function to update the screen size
         const handleResize = () => setScreenSize(window.innerWidth);
