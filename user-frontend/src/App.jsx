@@ -6,6 +6,7 @@ import ReserveBed from "./Pages/ReserveBed"
 import ProtectedRoute from "./components/ProtectedRoute"
 import BedReservations from "./Pages/Reservation"
 import HospitalDetails from "./components/HospitalDetails"
+import HospitalDirection from "./components/HospitalDirection"
 
 function App() {
 
@@ -24,7 +25,7 @@ function App() {
             <ProtectedRoute> <BedReservations /> </ProtectedRoute>
           }></Route>  
           <Route path="/hospital-details/:id" element={<HospitalDetails />} />
-
+          <Route path="/hospital-directions/:hospitalId" element={<HospitalDirection/>} />
         </Routes>
       </BrowserRouter>
     </>

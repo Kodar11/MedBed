@@ -21,11 +21,16 @@ app.use(cookieParser());
 import userRouter from './routes/user.routes.js';
 import hospitalRouter from './routes/hospital.routes.js';
 import userviewRouter from './routes/userview.routes.js';
+import directionRouter from './routes/direction.routes.js';
+
+
 
 // Routes declaration
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/hospitals", hospitalRouter);
 app.use("/api/v1/userview", userviewRouter);
+app.use('/api/v1/direction', directionRouter);
+
 
 
 let bedAvailability = new Map([

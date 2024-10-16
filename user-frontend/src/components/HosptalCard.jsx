@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Assuming you're using axios for API calls
+import HospitalDirection from './HospitalDirection';
 
 const HospitalCard = ({ hospital }) => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -64,8 +65,13 @@ const HospitalCard = ({ hospital }) => {
         navigate(`/hospital-details/${hospital.hospital.id}`);
     };
 
+    const handleDirection = () => {
+        // Use navigate to go to the HospitalDetails page and pass the hospital ID as a URL parameter
+        navigate(`/hospital-directions/${hospital.hospital.id}`);
+    };
+
     return (
-        <div className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg p-6 max-w-4xl mx-auto my-4 shadow-lg flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+        <div  className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg p-6 max-w-4xl mx-auto my-4 shadow-lg flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
             <div onClick={handleClick} className="flex-2 text-center md:text-left">
                 <h2 className="text-xl md:text-2xl font-semibold mb-2 mr-4">
                     {hospital.hospital.name}
@@ -121,6 +127,7 @@ const HospitalCard = ({ hospital }) => {
                                 viewBox="0 0 32 32"
                                 className="w-8 h-8"
                                 style={{ fill: "#262628" }}
+                                onClick={handleDirection}
                             >
                                 <path d="M28.91 4.417l-11 24a1 1 0 0 1-1.907-.334l-.93-11.157-11.156-.93a1 1 0 0 1-.334-1.906l24-11a1 1 0 0 1 1.326 1.326z" />
                             </svg>

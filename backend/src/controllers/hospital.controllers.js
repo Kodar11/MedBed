@@ -380,7 +380,7 @@ const getHospitalById = asyncHandler(async (req, res) => {
             },
         });
 
-        console.log(hospital);
+        // console.log(hospital);
         
 
         if (!hospital) {
