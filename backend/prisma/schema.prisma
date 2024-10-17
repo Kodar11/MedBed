@@ -72,6 +72,7 @@ model Hospital {
   HealthPackages      HealthPackage[]
   Customization       Customization[]
   BedReservation      BedReservation[]
+  HospitalLogin       HospitalLogin[]
 }
 
 model Customization {
@@ -181,4 +182,13 @@ model Ambulance {
 model Location {
     id        String    @id @default(uuid())
     name      String
+    islocation Boolean @default(false)
+}
+
+model HospitalLogin{
+  id String @id @default(uuid())
+  password String
+  hospital_id         String  @db.VarChar(255)
+
+  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }

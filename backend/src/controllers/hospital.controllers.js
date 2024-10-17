@@ -137,6 +137,46 @@ import { upload, deleteImage } from '../config/cloudinary.js';
 //     }
 // });
 
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+
+
+async function hashPassword(password) {
+  return await bcrypt.hash(password, 10);
+}
+
+async function isPasswordCorrect(user, password) {
+  return await bcrypt.compare(password, user.password);
+}
+
+// Function to generate access token
+function generateAccessToken(user) {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      phone_number: user.phone_number,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+    }
+  );
+}
+
+// Function to generate refresh token
+function generateRefreshToken(user) {
+  return jwt.sign(
+    {
+      id: user.id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+    }
+  );
+}
 
 const createHospital = asyncHandler(async (req, res) => {
     console.log(req.body);
@@ -508,8 +548,6 @@ const updateHospital = asyncHandler(async (req, res) => {
 });
 
 
-
-
 // Delete a hospital 
 const deleteHospital = asyncHandler(async (req, res) => {
     const { id } = req.body;
@@ -565,6 +603,62 @@ const deleteHospital = asyncHandler(async (req, res) => {
     }
 });
 
+const loginHospital = asyncHandler(async (req, res) => {
+    const { hospital_id, password } = req.body;
+  
+    if (!hospital_id) {
+      throw new ApiError(400, "Hospital ID is required");
+    }
+  
+    // Find the hospital login details based on the hospital_id
+    const hospitalLogin = await prisma.hospitalLogin.findFirst({
+      where: {  id : hospital_id }
+    });
+  
+    if (!hospitalLogin) {
+      throw new ApiError(404, "Hospital does not exist");
+    }
+  
+ 
+    // const isPasswordValid = await isPasswordCorrect(hospitalLogin, password);
+  
+    // if (!isPasswordValid) {
+    //   throw new ApiError(401, "Invalid hospital credentials");
+    // }
+  
+    // Generate access and refresh tokens for the hospital
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(hospitalLogin.id);
+  
+    // Retrieve hospital details for the response
+    const loggedInHospital = await prisma.hospital.findUnique({
+      where: { id: hospitalLogin.hospital_id },
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        contact_number: true,
+      }
+    });
+  
+    const options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax"
+    };
+  
+    // Send the tokens via cookies
+    res.cookie("accessToken", accessToken, options);
+    
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        { hospital: loggedInHospital, accessToken, refreshToken },
+        "Hospital logged in successfully"
+      )
+    );
+  });
+  
 
 
-export { createHospital, getAllHospitals, getHospitalById, updateHospital, deleteHospital };
+
+export { createHospital, getAllHospitals, getHospitalById, updateHospital, deleteHospital, loginHospital } ;
