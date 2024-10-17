@@ -20,11 +20,11 @@ function HospitalInfo({data, check}) {
         setHospitalData({ ...hospitalData, [e.target.name]: e.target.value });
     };
 
-    // useEffect(() => {
-    //     if (data) {
-    //         setHospitalData(data); // Preload the form data when available
-    //     }
-    // }, [data]);
+    useEffect(() => {
+        if (data) {
+            setHospitalData(data); // Preload the form data when available
+        }
+    }, [data]);
 
     var stepNo = 1;
 

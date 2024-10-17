@@ -235,8 +235,8 @@ function HospitalFormNavbar() {
                     <p className="max-sm:hidden">Health Packages</p>
                 </li>
                 
-                <li className={`flex items-center cursor-pointer ${activeStep === 8 ? "text-blue-600" : ""}`} onClick={() => setActiveStep(9)}>
-                    <span className={`flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 9 ? "border-blue-600" : "border-gray-500"}`}>9</span>
+                <li className={`flex items-center cursor-pointer ${activeStep === 8 ? "text-blue-600" : ""}`} onClick={() => setActiveStep(8)}>
+                    <span className={`flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 8 ? "border-blue-600" : "border-gray-500"}`}>8</span>
                     <p className="max-sm:hidden">Submit</p>
                 </li>
             </ol>

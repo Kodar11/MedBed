@@ -424,8 +424,8 @@ const updateHospital = asyncHandler(async (req, res) => {
         medicalEquipment,
         service,
         insurance,
-        mainImage,
-        subImages
+        // mainImage,
+        // subImages
     } = req.body;
 
 
@@ -448,8 +448,8 @@ const updateHospital = asyncHandler(async (req, res) => {
             where: { id },
             data: {
                 ...hospital,
-                mainImage: uploadedMainImage ? uploadedMainImage.secure_url : existingHospital.mainImage,
-                subImages: uploadedSubImages.map(img => img.secure_url),
+                // mainImage: uploadedMainImage ? uploadedMainImage.secure_url : existingHospital.mainImage,
+                // subImages: uploadedSubImages.map(img => img.secure_url),
             },
         });
 
