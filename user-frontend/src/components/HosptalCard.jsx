@@ -6,6 +6,7 @@ import HospitalDirection from './HospitalDirection';
 const HospitalCard = ({ hospital }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [screenSize, setScreenSize] = useState(window.innerWidth);
+    const [availableBeds, setAvailableBeds] = useState(0); // State to hold the available beds
     const navigate = useNavigate(); 
 
     useEffect(() => {
@@ -19,6 +20,26 @@ const HospitalCard = ({ hospital }) => {
         };
     }, []);
 
+    useEffect(() => {
+        // Function to fetch available beds from the API
+        const fetchAvailableBeds = async () => {
+            console.log("0",hospital.hospital.id);
+            
+            try {
+                const response = await axios.get(`http://localhost:3000/api/hospitals/${hospital.hospital.id}/available-beds`); // Adjust the endpoint as necessary
+                setAvailableBeds(response.data.availableBeds); // Assuming your API returns { availableBeds: number }
+            } catch (error) {
+                console.error("Error fetching available beds", error);
+            }
+        };
+
+        // Fetch available beds initially and every 10 seconds
+        fetchAvailableBeds();
+        const interval = setInterval(fetchAvailableBeds, 10000); // Fetch every 10 seconds
+
+        return () => clearInterval(interval); // Cleanup on unmount
+    }, [hospital.hospital.id]); // Dependency array ensures this runs when hospital ID changes
+
     if (!hospital) {
         return <p>No hospital data available.</p>; // Handle case where no hospital data is passed
     }
@@ -28,7 +49,7 @@ const HospitalCard = ({ hospital }) => {
         try {
             const response = await axios.get('/api/auth/verify');
             if (response.status === 200) {
-                navigate('/reserveBed');
+                navigate(`/reserveBed/${hospital.hospitalId}`);
             }
         } catch (error) {
             if (error.response?.status === 401) {
@@ -70,7 +91,7 @@ const HospitalCard = ({ hospital }) => {
                 <div className="flex justify-between items-center space-x-4">
                     <div className="flex flex-col text-center items-center justify-center">
                         <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg mb-2">
-                            <span>{hospital.beds?.length || 'N/A'}</span>
+                            <span>{availableBeds || 'N/A'}</span> {/* Show live bed availability */}
                         </div>
                         <p className="text-sm">Available Beds</p>
                     </div>
@@ -131,57 +152,57 @@ const HospitalCard = ({ hospital }) => {
                     <div className="flex justify-evenly gap-4">
                         <div className="flex flex-col text-center items-center justify-center">
                             <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg mb-2">
-                                <span>{hospital.beds?.length || 'N/A'}</span>
+                                <span>{availableBeds || 'N/A'}</span> {/* Show live bed availability */}
                             </div>
                             <p className="text-sm">Available Beds</p>
                         </div>
 
                         {/* Reserve Bed for mobile */}
                         <div className="flex flex-col justify-around items-center">
-                        <div
-                            className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center cursor-pointer"
-                            onClick={handleReserveBedClick}  // Add click handler
-                        >
-                            <svg
-                                version="1.1"
-                                id="Layer_1"
-                                xmlns="http://www.w3.org/2000/svg"
-                                x="0"
-                                y="0"
-                                viewBox="0 0 64 64"
-                                style={{ enableBackground: 'new 0 0 64 64' }}
-                                xmlSpace="preserve"
-                                className="w-8 h-8"
+                            <div
+                                className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center cursor-pointer"
+                                onClick={handleReserveBedClick}  // Add click handler
                             >
-                                {/* SVG content for reserve bed */}
-                            </svg>
+                                <svg
+                                    version="1.1"
+                                    id="Layer_1"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    x="0"
+                                    y="0"
+                                    viewBox="0 0 64 64"
+                                    style={{ enableBackground: 'new 0 0 64 64' }}
+                                    xmlSpace="preserve"
+                                    className="w-8 h-8"
+                                >
+                                    {/* SVG content for reserve bed */}
+                                </svg>
+                            </div>
+                            <p className="text-sm text-center">Reserve</p>
+                            <p className="text-sm text-center">Bed</p>
                         </div>
-                        <p className="text-sm text-center">Reserve</p>
-                        <p className="text-sm text-center">Bed</p>
-                    </div>
 
-                    <div className="flex flex-col justify-around items-center">
-                        <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 32 32"
-                                className="w-8 h-8"
-                                style={{ fill: "#262628" }}
-                            >
-                                <path d="M28.91 4.417l-11 24a1 1 0 0 1-1.907-.334l-.93-11.157-11.156-.93a1 1 0 0 1-.334-1.906l24-11a1 1 0 0 1 1.326 1.326z" />
-                            </svg>
+                        <div className="flex flex-col justify-around items-center">
+                            <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 32 32"
+                                    className="w-8 h-8"
+                                    style={{ fill: "#262628" }}
+                                >
+                                    <path d="M28.91 4.417l-11 24a1 1 0 0 1-1.907-.334l-.93-11.157-11.156-.93a1 1 0 0 1-.334-1.906l24-11a1 1 0 0 1 1.326 1.326z" />
+                                </svg>
+                            </div>
+                            <p className="text-sm text-center">Directions</p>
+                            <p className="text-sm text-center">Navigation</p>
                         </div>
-                        <p className="text-sm text-center">Directions</p>
-                        <p className="text-sm text-center">Navigation</p>
-                    </div>
 
-                    <div className="flex flex-col text-center items-center justify-center">
-                        <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg mb-2">
-                            <span role="img" aria-label="ambulance">🚑</span>
+                        <div className="flex flex-col text-center items-center justify-center">
+                            <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center text-lg mb-2">
+                                <span role="img" aria-label="ambulance">🚑</span>
+                            </div>
+                            <p className="text-sm">Call</p>
+                            <p className="text-sm">Ambulance</p>
                         </div>
-                        <p className="text-sm">Call</p>
-                        <p className="text-sm">Ambulance</p>
-                    </div>
                     </div>
                 </div>
             )}

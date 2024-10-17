@@ -207,22 +207,27 @@ const logoutUser = asyncHandler(async (req, res) => {
 const sendPaymentInfo = asyncHandler(async (req, res) => {
   try {
     const { id: userId } = req.params; // Now getting userId from request params
+    const { hospitalId } = req.body;   // Extract hospitalId from request body (or use req.params if passed via URL)
 
     // Validate input fields
     if (!userId) {
       throw new ApiError(400, "User ID is required");
     }
 
+    if (!hospitalId) {
+      throw new ApiError(400, "Hospital ID is required");
+    }
+
     console.log("Fetching bed reservation for user ID:", userId);
 
     // Fetch the bed reservation based on userId
     const bedReservation = await prisma.bedReservation.findFirst({
-      where: { userId: userId },  // Query using userId
+      where: { userId: userId },
       select: {
-        id: true,                 // Include the reservation ID as well
+        id: true,
         paymentId: true,
-        reservationTime: true,    // Correct field name
-        checkInTime: true,        // Use camelCase instead of snake_case
+        reservationTime: true,
+        checkInTime: true,
         late_patient: true,
         user: {
           select: {
@@ -239,6 +244,21 @@ const sendPaymentInfo = asyncHandler(async (req, res) => {
     }
 
     console.log("Bed reservation found:", bedReservation);
+
+    // Fetch hospital details using hospitalId
+    const hospital = await prisma.hospital.findUnique({
+      where: { id: hospitalId },
+      select: {
+        name: true,
+        contact_number: true,
+      },
+    });
+
+    if (!hospital) {
+      throw new ApiError(404, "Hospital not found");
+    }
+
+    console.log("Hospital found:", hospital);
 
     const { id: reservationId, user, paymentId, reservationTime, checkInTime, late_patient } = bedReservation;
 
@@ -269,6 +289,10 @@ const sendPaymentInfo = asyncHandler(async (req, res) => {
       bed_reservation_time: reservationTime || "Not available", // Use a fallback if null
       check_in_time: checkInTime || "Not yet checked in",        // Use a fallback if null
       late_patient: isLatePatient,
+      hospital_info: {
+        name: hospital.name,
+        contact_number: hospital.contact_number,
+      },
     };
 
     // Respond with a success message
@@ -285,38 +309,117 @@ const sendPaymentInfo = asyncHandler(async (req, res) => {
   }
 });
 
+
+const getHospitalReservationInfo = asyncHandler(async (req, res) => {
+  try {
+    const { hospitalId } = req.params;  // Get hospitalId from request params
+
+    // Validate hospitalId input
+    if (!hospitalId) {
+      throw new ApiError(400, "Hospital ID is required");
+    }
+
+    console.log("Fetching reservations for hospital ID:", hospitalId);
+
+    // Fetch bed reservations associated with this hospital
+    const bedReservations = await prisma.bedReservation.findMany({
+      where: { hospitalId: hospitalId },  // Get all reservations for this hospital
+      select: {
+        id: true,
+        paymentId: true,
+        reservationTime: true,
+        checkInTime: true,
+        late_patient: true,
+        user: {  // Select user info associated with the reservation
+          select: {
+            username: true,
+            email: true,
+            phone_number: true,
+          },
+        },
+      },
+    });
+
+    if (!bedReservations || bedReservations.length === 0) {
+      throw new ApiError(404, "No reservations found for this hospital");
+    }
+
+    console.log("Bed reservations found:", bedReservations);
+
+    // Construct the payload
+    const reservationInfo = bedReservations.map((reservation) => ({
+      reservation_id: reservation.id,
+      user_info: {
+        username: reservation.user.username,
+        email: reservation.user.email,
+        phone_number: reservation.user.phone_number,
+      },
+      payment_id: reservation.paymentId,
+      bed_reservation_time: reservation.reservationTime || "Not available",
+      check_in_time: reservation.checkInTime || "Not yet checked in",
+      late_patient: reservation.late_patient,
+    }));
+
+    // Respond with reservation and user info
+    res.status(200).json(
+      new ApiResponse(200, reservationInfo, "Reservation information retrieved successfully")
+    );
+
+  } catch (error) {
+    console.error("Error fetching hospital reservation info:", error);
+    res.status(500).json({
+      message: error.message || "Internal Server Error",
+    });
+  }
+});
+
+
+
 const createBedReservation = asyncHandler(async (req, res) => {
-  const { paymentId, userId } = req.body; // Expecting paymentId and userId in the request body
+  const { paymentId, userId, hospitalId } = req.body; // Expecting paymentId, userId, and hospitalId in the request body
+
+  console.log("Payment Id : ",paymentId);
+  console.log("user Id : ",userId);
+  console.log("Hospital Id : ",hospitalId);
+  
 
   // Validate input fields
-  if (!paymentId || !userId) {
-    throw new ApiError(400, "Payment ID and User ID are required");
+  if (!paymentId || !userId || !hospitalId) {
+    throw new ApiError(400, "Payment ID, User ID, and Hospital ID are required");
   }
 
-  // Create a new bed reservation with the default values for check_in and late_patient
-  const newReservation = await prisma.bedReservation.create({
-    data: {
-      paymentId: paymentId,
-      reservationTime: new Date(), // Set to current time
-      checkInTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
-      check_in: false, // Default false
-      late_patient: false, // Default false
-      userId: userId, // Associate with the user
-    },
-  });
+  try {
+    // Create a new bed reservation with the provided hospitalId and userId
+    const newReservation = await prisma.bedReservation.create({
+      data: {
+        paymentId: paymentId,
+        reservationTime: new Date(), // Set to current time
+        checkInTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+        check_in: false, // Default false
+        late_patient: false, // Default false
+        userId: userId, // Associate with the user
+        hospitalId: hospitalId, // Associate with the hospital
+      },
+    });
 
-  // Construct the response payload
-  const payload = {
-    id: newReservation.id,
-    paymentId: newReservation.paymentId,
-    reservationTime: newReservation.reservationTime,
-    checkInTime: newReservation.checkInTime,
-    check_in: newReservation.check_in,
-    late_patient: newReservation.late_patient,
-  };
+    // Construct the response payload
+    const payload = {
+      id: newReservation.id,
+      paymentId: newReservation.paymentId,
+      reservationTime: newReservation.reservationTime,
+      checkInTime: newReservation.checkInTime,
+      check_in: newReservation.check_in,
+      late_patient: newReservation.late_patient,
+      userId: newReservation.userId,        // Include userId in the response
+      hospitalId: newReservation.hospitalId // Include hospitalId in the response
+    };
 
-  // Respond with success message and reservation details
-  res.status(201).json(new ApiResponse(201, payload, "Payment successful and reservation created."));
+    // Respond with success message and reservation details
+    res.status(201).json(new ApiResponse(201, payload, "Payment successful and reservation created."));
+  } catch (error) {
+    console.error("Error creating bed reservation:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 export {
@@ -324,5 +427,6 @@ export {
   loginUser,
   logoutUser,
   sendPaymentInfo,
-  createBedReservation
+  createBedReservation,
+  getHospitalReservationInfo
 };

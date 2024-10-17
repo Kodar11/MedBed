@@ -6,14 +6,10 @@ import {
     loginUser,
     logoutUser,
     sendPaymentInfo,
-    createBedReservation
+    createBedReservation,
+    getHospitalReservationInfo
 } from "../controllers/user.controllers.js"
 
-import {
-    admitPatient,
-    getLiveBedCount,
-    dischargePatient
-} from "../controllers/redis.controller.js"
 
 const router = Router()
 
@@ -23,11 +19,8 @@ router.route("/logout").post(verifyJWT,logoutUser)
 
 router.route("/protected-route").get(verifyJWT,(req,res)=>{return res.status(200).json();})
 
-router.route("/send-payment-info/:id").get(sendPaymentInfo)
+router.route("/get-payment-info-user/:id").get(sendPaymentInfo)
+router.route("/get-payment-info-hospital/:id").get(getHospitalReservationInfo)
 router.route("/create-bed-reservation").post(verifyJWT,createBedReservation)
-
-router.route("/admit/:hospitalId").post(admitPatient)
-router.route("/discharge/:hospitalId").post(dischargePatient)
-router.route("/live-count/:hospitalId").get(getLiveBedCount)
 
 export default router

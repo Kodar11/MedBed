@@ -48,7 +48,7 @@ const BedReservations = () => {
         }
 
         // Fetch reservations based on the userId
-        const { data } = await axios.get(`http://localhost:3000/api/v1/users/send-payment-info/${userId}`);
+        const { data } = await axios.get(`http://localhost:3000/api/v1/users/get-payment-info-user/${userId}`);
         
         // Handle the received data
         if (data && data.data) {
