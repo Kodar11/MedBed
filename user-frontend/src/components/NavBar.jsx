@@ -33,11 +33,10 @@ function NavBar() {
         localStorage.clear();
 
         // Manage browser history to prevent going back to protected pages
-        history.back();
-        history.forward();
-        window.onpopstate = function () {
-            history.go(1);
-        };
+    
+        // window.onpopstate = function () {
+        //     history.go(1);
+        // };
 
         // Redirect user to the login page
         navigate("/login");

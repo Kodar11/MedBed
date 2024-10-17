@@ -7,7 +7,8 @@ import {
     logoutUser,
     sendPaymentInfo,
     createBedReservation,
-    getHospitalReservationInfo
+    getHospitalReservationInfo,
+    searchHospitals
 } from "../controllers/user.controllers.js"
 
 
@@ -22,5 +23,8 @@ router.route("/protected-route").get(verifyJWT,(req,res)=>{return res.status(200
 router.route("/get-payment-info-user/:id").get(sendPaymentInfo)
 router.route("/get-payment-info-hospital/:id").get(getHospitalReservationInfo)
 router.route("/create-bed-reservation").post(verifyJWT,createBedReservation)
+
+
+router.route("/search-hospital").get(searchHospitals)
 
 export default router

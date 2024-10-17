@@ -210,3 +210,25 @@ ALTER TABLE "PatientTestimonial" ADD CONSTRAINT "PatientTestimonial_hospital_id_
 
 -- AddForeignKey
 ALTER TABLE "HealthPackage" ADD CONSTRAINT "HealthPackage_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+-- Add searchVector column to Hospital table
+ALTER TABLE "Hospital"
+ADD COLUMN "searchVector" tsvector;
+
+-- Populate searchVector column with initial data
+UPDATE "Hospital"
+SET "searchVector" = to_tsvector('english', coalesce("name", '') || ' ' || coalesce("address", '') || ' ' || coalesce("city", ''));
+
+
+CREATE OR REPLACE FUNCTION update_search_vector()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW."searchVector" := to_tsvector('english', coalesce(NEW."name", '') || ' ' || coalesce(NEW."address", '') || ' ' || coalesce(NEW."city", ''));
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_search_vector_trigger
+BEFORE INSERT OR UPDATE ON "Hospital"
+FOR EACH ROW EXECUTE FUNCTION update_search_vector();
