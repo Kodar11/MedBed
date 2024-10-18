@@ -14,25 +14,33 @@ function BedInfoForm({ data, check }) {
     },
   ]);
 
-//   useEffect(() => {
-//     if (data) {
-//       setBedData(data); // Preload the form data when available
-//     }
-// }, [data]);
+  // useEffect(() => {
+  //   if (data) {
+  //     setBedData(data); // Preload the form data when available
+  //     setBedNo(data.length + 1); // Adjust bed number based on preloaded data
+  //   }
+  // }, [data]);
 
   const handleChange = (index, e) => {
     const { name, value } = e.target;
     const updatedBedData = [...bedData];
+    
     if (name === "total_beds" || name === "available_beds") {
       updatedBedData[index][name] = parseInt(value, 10) || 0;
+  
+      // Ensure available_beds is not greater than total_beds
+      if (name === "total_beds" && updatedBedData[index].available_beds > updatedBedData[index].total_beds) {
+        updatedBedData[index].available_beds = updatedBedData[index].total_beds;
+      }
     } else if (name === "price") {
       updatedBedData[index][name] = parseFloat(value) || 0;
     } else {
       updatedBedData[index][name] = value;
     }
-    // updatedBedData[index][e.target.name] = e.target.value;
+  
     setBedData(updatedBedData);
   };
+  
 
   const addBedForm = () => {
     setBedData([

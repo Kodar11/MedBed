@@ -24,7 +24,8 @@ import {
     getAllHospitals,
     getHospitalById,
     updateHospital,
-    deleteHospital
+    deleteHospital,
+    loginHospital
 } from "../controllers/hospital.controllers.js"; 
 
 const router = Router();
@@ -46,6 +47,9 @@ router.route("/updateHospital/:id")
 
 
 router.route("/deleteHospital")
-    .delete(deleteHospital); 
+    .delete(deleteHospital);
+    
+
+router.route("/login").post(loginHospital);
 
 export default router;

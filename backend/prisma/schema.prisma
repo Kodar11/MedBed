@@ -32,6 +32,8 @@ model BedReservation {
   @@index([userId])
 }
 
+
+
 model UserInsurance {
   id                String   @id @default(uuid()) @db.VarChar(255)
   insurance_company String   @db.VarChar(255)

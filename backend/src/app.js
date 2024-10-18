@@ -34,11 +34,11 @@ app.use('/api/v1/direction', directionRouter);
 
 
 let bedAvailability = new Map([
-    ['25e46e6f-ebf5-401d-bf05-afce0f0da30b', 10],
-    ['2ab549f5-6dcb-4e17-aae3-260ec45d5c51', 5],  // Hospital ID 2 has 5 available beds
-    ['6f8b1403-4345-43a3-8731-0276cf4f23ff', 20], // Hospital ID 3 has 20 available beds
-    ['73ea5d08-53f6-44d7-9667-e264085afeb8', 1],  // Hospital ID 4 has 0 available beds
-    ['cb75c0f7-834a-4229-a9b0-aab2224e5952', 15]  // Hospital ID 5 has 15 available beds
+    ['4529ad37-43bc-40d1-8653-49ec83783030', 10],
+    ['4afecc49-17e3-46cb-900d-142f1580732f', 5],  // Hospital ID 2 has 5 available beds
+    ['973c2140-fd4a-4518-bb50-2f68aaa35993', 20], // Hospital ID 3 has 20 available beds
+    ['a3cb08f4-1eb9-4408-88de-1fd04ffeb006', 1],  // Hospital ID 4 has 0 available beds
+    ['e449baf0-ad62-465a-b946-3c2399331bd2', 15]  // Hospital ID 5 has 15 available beds
 ]);
 
 // Endpoint to get available beds for a specific hospital   
@@ -96,13 +96,6 @@ app.post('/api/hospitals/:id/decrement-beds', (req, res) => {
 
 
 
-
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-});
 
 // Starting the server
 const PORT = process.env.PORT || 5000;

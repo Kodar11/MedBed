@@ -35,7 +35,7 @@ const HospitalCard = ({ hospital }) => {
 
         // Fetch available beds initially and every 10 seconds
         fetchAvailableBeds();
-        const interval = setInterval(fetchAvailableBeds, 10000); // Fetch every 10 seconds
+        const interval = setInterval(fetchAvailableBeds, 1); // Fetch every 10 seconds
 
         return () => clearInterval(interval); // Cleanup on unmount
     }, [hospital.hospital.id]); // Dependency array ensures this runs when hospital ID changes

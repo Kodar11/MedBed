@@ -15,7 +15,7 @@ CREATE TABLE "BedReservation" (
     "id" VARCHAR(255) NOT NULL,
     "paymentId" VARCHAR(255) NOT NULL,
     "reservationTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "checkInTime" TIMESTAMP(3) NOT NULL DEFAULT (now() + interval '2 hours'),
+    "checkInTime" TIMESTAMP(3) NOT NULL DEFAULT (now() + '02:00:00'::interval),
     "check_in" BOOLEAN NOT NULL DEFAULT false,
     "late_patient" BOOLEAN NOT NULL DEFAULT false,
     "userId" TEXT NOT NULL,
@@ -182,10 +182,10 @@ CREATE INDEX "BedReservation_userId_idx" ON "BedReservation"("userId");
 CREATE UNIQUE INDEX "Hospital_email_key" ON "Hospital"("email");
 
 -- AddForeignKey
-ALTER TABLE "BedReservation" ADD CONSTRAINT "BedReservation_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "BedReservation" ADD CONSTRAINT "BedReservation_hospitalId_fkey" FOREIGN KEY ("hospitalId") REFERENCES "Hospital"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BedReservation" ADD CONSTRAINT "BedReservation_hospitalId_fkey" FOREIGN KEY ("hospitalId") REFERENCES "Hospital"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BedReservation" ADD CONSTRAINT "BedReservation_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Customization" ADD CONSTRAINT "Customization_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -210,25 +210,3 @@ ALTER TABLE "PatientTestimonial" ADD CONSTRAINT "PatientTestimonial_hospital_id_
 
 -- AddForeignKey
 ALTER TABLE "HealthPackage" ADD CONSTRAINT "HealthPackage_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
-
--- Add searchVector column to Hospital table
-ALTER TABLE "Hospital"
-ADD COLUMN "searchVector" tsvector;
-
--- Populate searchVector column with initial data
-UPDATE "Hospital"
-SET "searchVector" = to_tsvector('english', coalesce("name", '') || ' ' || coalesce("address", '') || ' ' || coalesce("city", ''));
-
-
-CREATE OR REPLACE FUNCTION update_search_vector()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW."searchVector" := to_tsvector('english', coalesce(NEW."name", '') || ' ' || coalesce(NEW."address", '') || ' ' || coalesce(NEW."city", ''));
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER update_search_vector_trigger
-BEFORE INSERT OR UPDATE ON "Hospital"
-FOR EACH ROW EXECUTE FUNCTION update_search_vector();
