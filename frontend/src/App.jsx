@@ -40,14 +40,16 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* <Route path="/"  element={<Home/>} />
-          <Route path="/hospital-details/:id" element={<HospitalDetails />} /> */}
-          {/* <Route path="/user-login" element={<UserLogin />} /> */}
+          <Route path="/hospital-details/:id" element={<HospitalDetails />} /> 
+          <Route path="/user-login" element={<UserLogin />} /> */}
         <Route path="/" element={<HospitalLogin />} />
         <Route path="/hospital-home" element={<HospitalHome />} />
         <Route path="/hospital-form" element={<HospitalFormNavbar />} />
         <Route path="/hospital-directions/:hospitalId" element={<HospitalDirection/>} />
         </Routes>
     </BrowserRouter>
+
+    {/* <HospitalFormNavbar /> */}
     </>
   )
 }
