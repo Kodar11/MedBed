@@ -420,6 +420,83 @@ const searchHospitals = async (req, res) => {
   }
 };
 
+// In-memory map to cache the bed availability data
+let bedAvailability = new Map();
+
+// Function to load bed data into the map from the BedInfo table
+const loadBedData = async () => {
+    const beds = await prisma.bedInfo.findMany();
+    beds.forEach(bed => {
+        bedAvailability.set(bed.hospital_id, bed.available_beds);
+    });
+};
+
+// Load bed data into the map initially when the server starts
+loadBedData().catch(err => console.error(err));
+
+// Endpoint to get available beds for a specific hospital
+const getAvailableBeds = asyncHandler(async (req, res) => {
+    const id = req.params.id; // Extract hospital ID from the URL
+
+    // Check if the ID exists in the in-memory map
+    if (!bedAvailability.has(id)) {
+        return res.status(404).json({ message: `Hospital ID ${id} not found.` });
+    }
+
+    const availableBeds = bedAvailability.get(id);
+    return res.status(200).json({ availableBeds });
+});
+
+// Endpoint to increment the available beds for a specific hospital
+const incrementBeds = asyncHandler(async (req, res) => {
+    const id = req.params.id;
+
+    // Check if the ID exists in the map
+    if (!bedAvailability.has(id)) {
+        return res.status(404).json({ message: `Hospital ID ${id} not found.` });
+    }
+
+    // Increment the available beds in memory and update the database
+    let currentBeds = bedAvailability.get(id);
+    bedAvailability.set(id, currentBeds + 1);
+
+    await prisma.bedInfo.update({
+        where: { hospital_id: id },
+        data: { available_beds: currentBeds + 1 },
+    });
+
+    return res
+        .status(200)
+        .json({ message: `Available beds for Hospital ID ${id} incremented. Current value: ${bedAvailability.get(id)}` });
+});
+
+// Endpoint to decrement the available beds for a specific hospital
+const decrementBeds = asyncHandler(async (req, res) => {
+    const id = req.params.id;
+
+    // Check if the ID exists in the map
+    if (!bedAvailability.has(id)) {
+        return res.status(404).json({ message: `Hospital ID ${id} not found.` });
+    }
+
+    let currentBeds = bedAvailability.get(id);
+    if (currentBeds > 0) {
+        bedAvailability.set(id, currentBeds - 1);
+
+        // Update the database with the decremented value
+        await prisma.bedInfo.update({
+            where: { hospital_id: id },
+            data: { available_beds: currentBeds - 1 },
+        });
+
+        return res.status(200).json({
+            message: `Available beds for Hospital ID ${id} decremented. Current value: ${bedAvailability.get(id)}`
+        });
+    } else {
+        return res.status(400).json({ message: `Available beds for Hospital ID ${id} cannot be less than 0.` });
+    }
+});
+
 
 export {
   registerUser,
@@ -428,5 +505,9 @@ export {
   sendPaymentInfo,
   createBedReservation,
   getHospitalReservationInfo,
-  searchHospitals
+  searchHospitals,
+  loadBedData,
+  getAvailableBeds,
+  incrementBeds,
+  decrementBeds
 };
