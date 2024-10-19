@@ -76,7 +76,7 @@ function LoginForm() {
           </button>
         </form>
         <br />
-        <a href="/" className="block text-center text-blue-500 hover:underline">Register</a>
+        <a href="/register" className="block text-center text-blue-500 hover:underline">Register</a>
       </div>
     </>
   );

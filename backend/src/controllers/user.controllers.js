@@ -206,23 +206,18 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const sendPaymentInfo = asyncHandler(async (req, res) => {
   try {
-    const { id: userId } = req.params; // Now getting userId from request params
-    const { hospitalId } = req.body;   // Extract hospitalId from request body (or use req.params if passed via URL)
+    const { id: userId } = req.params; // Getting userId from request params
 
     // Validate input fields
     if (!userId) {
       throw new ApiError(400, "User ID is required");
     }
 
-    if (!hospitalId) {
-      throw new ApiError(400, "Hospital ID is required");
-    }
-
     console.log("Fetching bed reservation for user ID:", userId);
 
-    // Fetch the bed reservation based on userId
+    // Fetch bed reservation with the user details via relation
     const bedReservation = await prisma.bedReservation.findFirst({
-      where: { userId: userId },
+      where: { userId: userId }, // Foreign key used here
       select: {
         id: true,
         paymentId: true,
@@ -244,21 +239,6 @@ const sendPaymentInfo = asyncHandler(async (req, res) => {
     }
 
     console.log("Bed reservation found:", bedReservation);
-
-    // Fetch hospital details using hospitalId
-    const hospital = await prisma.hospital.findUnique({
-      where: { id: hospitalId },
-      select: {
-        name: true,
-        contact_number: true,
-      },
-    });
-
-    if (!hospital) {
-      throw new ApiError(404, "Hospital not found");
-    }
-
-    console.log("Hospital found:", hospital);
 
     const { id: reservationId, user, paymentId, reservationTime, checkInTime, late_patient } = bedReservation;
 
@@ -286,21 +266,14 @@ const sendPaymentInfo = asyncHandler(async (req, res) => {
         phone_number: user.phone_number,
       },
       payment_id: paymentId,
-      bed_reservation_time: reservationTime || "Not available", // Use a fallback if null
-      check_in_time: checkInTime || "Not yet checked in",        // Use a fallback if null
+      bed_reservation_time: reservationTime || "Not available", // Fallback if null
+      check_in_time: checkInTime || "Not yet checked in",        // Fallback if null
       late_patient: isLatePatient,
-      hospital_info: {
-        name: hospital.name,
-        contact_number: hospital.contact_number,
-      },
     };
 
-    // Respond with a success message
-    console.log("Sending response with payload:", payload);
     res.status(200).json(
       new ApiResponse(200, payload, "Payment and bed reservation info sent successfully")
     );
-
   } catch (error) {
     console.error("Error in sendPaymentInfo:", error); // Log the error to the console
     res.status(500).json({
@@ -312,7 +285,7 @@ const sendPaymentInfo = asyncHandler(async (req, res) => {
 
 const getHospitalReservationInfo = asyncHandler(async (req, res) => {
   try {
-    const { hospitalId } = req.params;  // Get hospitalId from request params
+    const {hospitalId} = req.params;  // Get hospitalId from request params
 
     // Validate hospitalId input
     if (!hospitalId) {
@@ -422,11 +395,36 @@ const createBedReservation = asyncHandler(async (req, res) => {
   }
 });
 
+
+// Controller for searching hospitals
+const searchHospitals = async (req, res) => {
+  const { query } = req.query; // Get the search query from request params
+
+  if (!query || typeof query !== 'string') {
+    return res.status(400).json({ message: 'Search query is required' });
+  }
+
+  try {
+    const hospitals = await prisma.$queryRaw`
+      SELECT * FROM "Hospital"
+      WHERE "searchVector" @@ plainto_tsquery('english', ${query})
+      ORDER BY ts_rank("searchVector", plainto_tsquery('english', ${query})) DESC;
+    `;
+
+    res.status(200).json(hospitals);
+  } catch (error) {
+    console.error('Error searching hospitals:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   sendPaymentInfo,
   createBedReservation,
-  getHospitalReservationInfo
+  getHospitalReservationInfo,
+  searchHospitals
 };

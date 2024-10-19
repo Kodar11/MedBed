@@ -8,31 +8,30 @@ datasource db {
 }
 
 model User {
-  id               String           @id @default(uuid()) @db.VarChar(255)
-  username         String           @unique @db.VarChar(255)
-  email            String           @unique @db.VarChar(255)
-  password         String           @db.VarChar(255)
-  phone_number     String           @db.VarChar(255)
-  refresh_token    String?          @db.VarChar(255)
-  
-  // New relation field for bed reservations
-  bedReservations  BedReservation[] // One user can have many bed reservations
+  id              String           @id @default(uuid()) @db.VarChar(255)
+  username        String           @unique @db.VarChar(255)
+  email           String           @unique @db.VarChar(255)
+  password        String           @db.VarChar(255)
+  phone_number    String           @db.VarChar(255)
+  refresh_token   String?          @db.VarChar(255)
+  bedReservations BedReservation[]
 }
 
 model BedReservation {
-  id                 String   @id @default(uuid()) @db.VarChar(255)
-  paymentId          String   @db.VarChar(255)     // Stores the payment ID from Razorpay or another payment provider
-  reservationTime    DateTime @default(now())      // The time when the bed was reserved
-  checkInTime        DateTime @default(dbgenerated("(now() + interval '2 hours')")) // Set 2 hours later after reservation
-  check_in           Boolean  @default(false)      // Default false, changes when patient checks in
-  late_patient       Boolean  @default(false)      // Default false, set true if patient is late
-  userId             String                        // Foreign key connected to the User table
-  hospitalId         String
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  hospital          Hospital  @relation(fields: [hospitalId],references: [id])
+  id              String   @id @default(uuid()) @db.VarChar(255)
+  paymentId       String   @db.VarChar(255)
+  reservationTime DateTime @default(now())
+  checkInTime     DateTime @default(dbgenerated("(now() + '02:00:00'::interval)"))
+  check_in        Boolean  @default(false)
+  late_patient    Boolean  @default(false)
+  userId          String
+  hospitalId      String
+  hospital        Hospital @relation(fields: [hospitalId], references: [id])
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])                               // Indexing userId for efficient querying
+  @@index([userId])
 }
+
 
 
 model UserInsurance {
@@ -42,46 +41,47 @@ model UserInsurance {
   valid_till        DateTime
   policy_number     String   @db.VarChar(255)
   coverage_amount   Decimal
-
-  // user              User?         @relation(fields: [id], references: [id])
 }
 
 model Hospital {
-  id             String  @id @default(uuid()) @db.VarChar(255)
-  name           String  @db.VarChar(255)
-  address        String  @db.VarChar(255)
-  city           String  @db.VarChar(255)
-  state          String  @db.VarChar(255)
-  zip_code       String  @db.VarChar(255)
-  contact_number String  @db.VarChar(255)
-  email          String? @unique @db.VarChar(255)
-  website        String? @db.VarChar(255)
-  type           String  @db.VarChar(255)
-  accreditation  String? @db.VarChar(255)
-  account_number String? @db.VarChar(255)
+  id                  String               @id @default(uuid()) @db.VarChar(255)
+  name                String               @db.VarChar(255)
+  address             String               @db.VarChar(255)
+  city                String               @db.VarChar(255)
+  state               String               @db.VarChar(255)
+  zip_code            String               @db.VarChar(255)
+  contact_number      String               @db.VarChar(255)
+  email               String?              @unique @db.VarChar(255)
+  website             String?              @db.VarChar(255)
+  type                String               @db.VarChar(255)
+  accreditation       String?              @db.VarChar(255)
+  account_number      String?              @db.VarChar(255)
 
-  // New fields for images
 
-  // Relations
   BedInfos            BedInfo[]
-  Doctors             Doctor[]
-  MedicalEquipments   MedicalEquipment[]
-  Services            Service[]
-  Insurances          Insurance[]
-  PatientTestimonials PatientTestimonial[]
-  HealthPackages      HealthPackage[]
-  Customization       Customization[]
   BedReservation      BedReservation[]
-  HospitalLogin       HospitalLogin[]
+  Customization       Customization[]
+  Doctors             Doctor[]
+  HealthPackages      HealthPackage[]
+  Insurances          Insurance[]
+  MedicalEquipments   MedicalEquipment[]
+  PatientTestimonials PatientTestimonial[]
+  Services            Service[]
+}
+
+model HospitalLogin{
+  id              String  @id
+  hospital_id     String    
+  password        String
+  refresh_token   String?   @db.VarChar(255)
 }
 
 model Customization {
-  id             String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id    String  @db.VarChar(255)
-  active_Service Boolean @default(true)
+  id             String   @id @default(uuid()) @db.VarChar(255)
+  hospital_id    String   @db.VarChar(255)
+  active_Service Boolean  @default(true)
   deposit_Amount Int
-
-  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  hospital       Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model BedInfo {
@@ -92,81 +92,66 @@ model BedInfo {
   available_beds Int
   price          Decimal?
   live_bedcount  Int
-
-  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  hospital       Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model Doctor {
-  id               String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id      String  @db.VarChar(255)
-  name             String  @db.VarChar(255)
-  specialization   String  @db.VarChar(255)
-  qualification    String  @db.VarChar(255)
+  id               String   @id @default(uuid()) @db.VarChar(255)
+  hospital_id      String   @db.VarChar(255)
+  name             String   @db.VarChar(255)
+  specialization   String   @db.VarChar(255)
+  qualification    String   @db.VarChar(255)
   experience_years Int
-  availability     String  @db.VarChar(255)
-  contact_info     String? @db.VarChar(255)
-
-  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  availability     String   @db.VarChar(255)
+  contact_info     String?  @db.VarChar(255)
+  hospital         Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model MedicalEquipment {
-  id                   String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id          String  @db.VarChar(255)
-  equipment_name       String  @db.VarChar(255)
-  equipment_type       String  @db.VarChar(255)
+  id                   String   @id @default(uuid()) @db.VarChar(255)
+  hospital_id          String   @db.VarChar(255)
+  equipment_name       String   @db.VarChar(255)
+  equipment_type       String   @db.VarChar(255)
   availability         Boolean
-  certification_status String? @db.VarChar(255)
-
-  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  certification_status String?  @db.VarChar(255)
+  hospital             Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model Service {
-  id                  String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id         String  @db.VarChar(255)
-  service_name        String  @db.VarChar(255)
-  service_description String? @db.VarChar(255) // Renamed from description
+  id                  String   @id @default(uuid()) @db.VarChar(255)
+  hospital_id         String   @db.VarChar(255)
+  service_name        String   @db.VarChar(255)
+  service_description String?  @db.VarChar(255)
   availability        Boolean
-
-  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  hospital            Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model Insurance {
-  id               String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id      String  @db.VarChar(255)
-  insurance_company String  @db.VarChar(255)
-  contact_info     String? @db.VarChar(255)
-  insurance_type_id String  @db.VarChar(255)
-  cashless        Boolean
-
-  hospital         Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
-  //insurance_type   InsuranceType @relation(fields: [insurance_type_id], references: [id])
+  id                String   @id @default(uuid()) @db.VarChar(255)
+  hospital_id       String   @db.VarChar(255)
+  insurance_company String   @db.VarChar(255)
+  contact_info      String?  @db.VarChar(255)
+  insurance_type_id String   @db.VarChar(255)
+  cashless          Boolean
+  hospital          Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
-//model InsuranceType {
-//  id              String  @id @default(uuid()) @db.VarChar(255)
-//  insurance_type  String  @db.VarChar(255)
-//  cashless        Boolean
-
-//  Insurances      Insurance[]
-//}
 model PatientTestimonial {
-  id           String @id @default(uuid()) @db.VarChar(255)
-  hospital_id  String @db.VarChar(255)
-  patient_name String @db.VarChar(255)
-  feedback     String @db.VarChar(255)
-  rating       Int? // optional, 1-5 scale
-
-  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid()) @db.VarChar(255)
+  hospital_id  String   @db.VarChar(255)
+  patient_name String   @db.VarChar(255)
+  feedback     String   @db.VarChar(255)
+  rating       Int?
+  hospital     Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model HealthPackage {
-  id                  String  @id @default(uuid()) @db.VarChar(255)
-  hospital_id         String  @db.VarChar(255)
-  package_name        String  @db.VarChar(255)
-  package_description String? @db.VarChar(255) // Renamed from description
-  package_price       Decimal // Renamed from price
-
-  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  id                  String   @id @default(uuid()) @db.VarChar(255)
+  hospital_id         String   @db.VarChar(255)
+  package_name        String   @db.VarChar(255)
+  package_description String?  @db.VarChar(255)
+  package_price       Decimal
+  hospital            Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
 }
 
 model Ambulance {
@@ -180,15 +165,6 @@ model Ambulance {
 }
 
 model Location {
-    id        String    @id @default(uuid())
-    name      String
-    islocation Boolean @default(false)
-}
-
-model HospitalLogin{
-  id String @id @default(uuid())
-  password String
-  hospital_id         String  @db.VarChar(255)
-
-  hospital Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  id   String @id @default(uuid())
+  name String
 }

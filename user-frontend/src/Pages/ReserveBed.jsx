@@ -25,6 +25,8 @@ const RazorpayPayment = () => { // Accept hospitalId as a prop
     script.async = true;
     document.body.appendChild(script);
 
+    console.log("Hospital ID from params:", hospitalId);
+
     return () => {
       document.body.removeChild(script); // Clean up
     };

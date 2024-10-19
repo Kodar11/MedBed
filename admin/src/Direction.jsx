@@ -23,7 +23,7 @@ const Direction = () => {
       }, 
       // {
       //   headers: {
-      //     Authorization: `Bearer ${accessToken}`,
+      //     Authorization: Bearer ${accessToken},
       //   }, withCredentials: true
       // }
     );

@@ -15,7 +15,7 @@ CREATE TABLE "BedReservation" (
     "id" VARCHAR(255) NOT NULL,
     "paymentId" VARCHAR(255) NOT NULL,
     "reservationTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "checkInTime" TIMESTAMP(3) NOT NULL DEFAULT (now() + interval '2 hours'),
+    "checkInTime" TIMESTAMP(3) NOT NULL DEFAULT (now() + '02:00:00'::interval),
     "check_in" BOOLEAN NOT NULL DEFAULT false,
     "late_patient" BOOLEAN NOT NULL DEFAULT false,
     "userId" TEXT NOT NULL,
@@ -52,6 +52,16 @@ CREATE TABLE "Hospital" (
     "account_number" VARCHAR(255),
 
     CONSTRAINT "Hospital_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "HospitalLogin" (
+    "id" TEXT NOT NULL,
+    "hospital_id" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "refresh_token" TEXT NOT NULL,
+
+    CONSTRAINT "HospitalLogin_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -182,10 +192,10 @@ CREATE INDEX "BedReservation_userId_idx" ON "BedReservation"("userId");
 CREATE UNIQUE INDEX "Hospital_email_key" ON "Hospital"("email");
 
 -- AddForeignKey
-ALTER TABLE "BedReservation" ADD CONSTRAINT "BedReservation_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "BedReservation" ADD CONSTRAINT "BedReservation_hospitalId_fkey" FOREIGN KEY ("hospitalId") REFERENCES "Hospital"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BedReservation" ADD CONSTRAINT "BedReservation_hospitalId_fkey" FOREIGN KEY ("hospitalId") REFERENCES "Hospital"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BedReservation" ADD CONSTRAINT "BedReservation_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Customization" ADD CONSTRAINT "Customization_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "Hospital"("id") ON DELETE CASCADE ON UPDATE CASCADE;

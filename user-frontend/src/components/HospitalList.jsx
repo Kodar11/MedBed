@@ -21,6 +21,12 @@ const HospitalList = () => {
       }
     };
 
+    // Fetch available beds initially and every 10 seconds
+        
+        const interval = setInterval(fetchHospitalData, 10000); // Fetch every 10 seconds
+
+        return () => clearInterval(interval); // Cleanup on unmount
+
     fetchHospitalData();
   }, []);
 
