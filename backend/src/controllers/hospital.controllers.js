@@ -352,6 +352,8 @@ const getHospitalById = asyncHandler(async (req, res) => {
 // Update a hospital 
 const updateHospital = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    console.log(id);
+    
 
     const {
         hospital,
@@ -360,6 +362,7 @@ const updateHospital = asyncHandler(async (req, res) => {
         medicalEquipment,
         service,
         insurance,
+        healthPackages,
         // mainImage,
         // subImages
     } = req.body;
@@ -380,63 +383,198 @@ const updateHospital = asyncHandler(async (req, res) => {
         // const uploadedSubImages = subImages ? await Promise.all(subImages.map(path => upload(path))) : existingHospital.subImages;
 
 
+        // const updatedHospital = await prisma.hospital.update({
+        //     where: { id },
+        //     data: {
+        //         ...hospital,
+        //         // mainImage: uploadedMainImage ? uploadedMainImage.secure_url : existingHospital.mainImage,
+        //         // subImages: uploadedSubImages.map(img => img.secure_url),
+        //     },
+        // });
+
+        // // Update BedInfo
+        // const updatedBedInfo = await prisma.bedInfo.update({
+        //     where: { hospital_id: id },
+        //     data: {
+        //         ...beds
+        //     },
+        // });
+
+        // // Update Doctor
+        // const updatedDoctor = await prisma.doctor.update({
+        //     where: { hospital_id: id },
+        //     data: {
+        //         ...doctor
+        //     },
+        // });
+
+        // // Update Medical Equipment
+        // const updatedMedicalEquipment = await prisma.medicalEquipment.update({
+        //     where: { hospital_id: id },
+        //     data: {
+        //         ...medicalEquipment
+        //     }
+        // });
+
+        // // Update Service
+        // const updatedService = await prisma.service.update({
+        //     where: { hospital_id: id },
+        //     data: {
+        //         ...service
+        //     },
+        // });
+
+        // // Update Insurance
+        // const updatedInsurance = await prisma.insurance.update({
+        //     where: { hospital_id: id },
+        //     data: {
+        //         ...insurance
+        //     },
+        // });
+
         const updatedHospital = await prisma.hospital.update({
             where: { id },
             data: {
-                ...hospital,
-                // mainImage: uploadedMainImage ? uploadedMainImage.secure_url : existingHospital.mainImage,
-                // subImages: uploadedSubImages.map(img => img.secure_url),
+                ...hospital,  // Update the main hospital data
+                
+                // Update BedInfos (nested update)
+                BedInfos: {
+                    upsert: beds.map(bed => ({
+                        where: { id: bed.id },  // Assuming each bed has a unique `id`
+                        update: {
+                            total_beds: bed.total_beds,
+                            bed_type: bed.bed_type,
+                            available_beds: bed.available_beds,
+                            price: bed.price,
+                            live_bedcount: bed.available_beds,
+                        },
+                        create: {
+                            id: bed.id,
+                            total_beds: bed.total_beds,
+                            bed_type: bed.bed_type,
+                            available_beds: bed.available_beds,
+                            price: bed.price,
+                            live_bedcount: bed.available_beds,
+                           
+                        }
+                    })),
+                },
+        
+                // Update Doctors
+                Doctors: {
+                    upsert: doctor.map(doc => ({
+                        where: { id: doc.id },
+                        update: {
+                            name: doc.name,
+                            specialization: doc.specialization,
+                            qualification: doc.qualification,
+                            experience_years: doc.experience_years,
+                            availability: doc.availability,
+                            contact_info: doc.contact_info  ,
+                        },
+                        create: {
+                            id: doc.id,
+                            name: doc.name,
+                            specialization: doc.specialization,
+                            qualification: doc.qualification,
+                            experience_years: doc.experience_years,
+                            availability: doc.availability,
+                            contact_info: doc.contact_info,
+                            
+                        }
+                    })),
+                },
+        
+                // Update MedicalEquipments
+                MedicalEquipments: {
+                    upsert: medicalEquipment.map(equipment => ({
+                        where: { id: equipment.id },
+                        update: {
+                            equipment_name: equipment.equipment_name,
+                            equipment_type: equipment.equipment_type,
+                            availability: equipment.availability,
+                            certification_status: equipment.certification_status,
+                        },
+                        create: {
+                            id: equipment.id,
+                            equipment_name: equipment.equipment_name,
+                            equipment_type: equipment.equipment_type,
+                            availability: equipment.availability,
+                            certification_status: equipment.certification_status,
+                            
+                        }
+                    })),
+                },
+        
+                // Update Services
+                Services: {
+                    upsert: service.map(s => ({
+                        where: { id: s.id },
+                        update: {
+                            service_name: s.service_name,
+                            service_description: s.service_description,
+                            availability: s.availability,
+                        },
+                        create: {
+                            id: s.id,
+                            service_name: s.service_name,
+                            service_description: s.service_description,
+                            availability: s.availability,
+                            
+                        }
+                    })),
+                },
+        
+                // Update Insurances
+                Insurances: {
+                    upsert: insurance.map(ins => ({
+                        where: { id: ins.id },
+                        update: {
+                            insurance_company: ins.insurance_company,
+                            contact_info: ins.contact_info,
+                            insurance_type_id: ins.insurance_type_id,
+                            cashless: ins.cashless,
+                        },
+                        create: {
+                            id: ins.id,
+                            insurance_company: ins.insurance_company,
+                            contact_info: ins.contact_info,
+                            insurance_type_id: ins.insurance_type_id,
+                            cashless: ins.cashless,
+                        }
+                    })),
+                },
+
+                HealthPackages: {
+                    upsert: healthPackages.map(hp => ({
+                        where: { id: hp.id },
+                        update: {
+                            package_name: hp.package_name,
+                            package_description: hp.package_description,
+                            package_price: hp.package_price,
+                        },
+                        create: {
+                            id: hp.id,
+                            package_name: hp.package_name,
+                            package_description: hp.package_description,
+                            package_price: hp.package_price,
+                            
+                        }
+                    })),
+                },
             },
         });
-
-        // Update BedInfo
-        const updatedBedInfo = await prisma.bedInfo.update({
-            where: { hospital_id: id },
-            data: {
-                ...beds
-            },
-        });
-
-        // Update Doctor
-        const updatedDoctor = await prisma.doctor.update({
-            where: { hospital_id: id },
-            data: {
-                ...doctor
-            },
-        });
-
-        // Update Medical Equipment
-        const updatedMedicalEquipment = await prisma.medicalEquipment.update({
-            where: { hospital_id: id },
-            data: {
-                ...medicalEquipment
-            }
-        });
-
-        // Update Service
-        const updatedService = await prisma.service.update({
-            where: { hospital_id: id },
-            data: {
-                ...service
-            },
-        });
-
-        // Update Insurance
-        const updatedInsurance = await prisma.insurance.update({
-            where: { hospital_id: id },
-            data: {
-                ...insurance
-            },
-        });
+        
 
         // Respond with the updated entities
         res.json({
             updatedHospital,
-            updatedBedInfo,
-            updatedDoctor,
-            updatedMedicalEquipment,
-            updatedService,
-            updatedInsurance
+            // updatedBedInfo,
+            // updatedDoctor,
+            // updatedInsurance,
+            // updatedHealthPackages,
+            // updatedMedicalEquipment,
+            // updatedService
         });
     } catch (error) {
         throw new ApiError(400, "Error updating hospital or related entities: " + error.message);

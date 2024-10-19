@@ -12,11 +12,11 @@ function HealthPackage({ data, check }) {
     },
   ]);
 
-//   useEffect(() => {
-//     if (data) {
-//       setPackageData(data); // Preload the form data when available
-//     }
-// }, [data]);
+  useEffect(() => {
+    if (data) {
+      setPackageData(data); // Preload the form data when available
+    }
+}, [data]);
 
   const handleChange = (index, e) => {
     const { name, value } = e.target;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useParams } from 'react-router-dom';
 
 const HospitalHome = () => {
   const [reservations, setReservations] = useState([]);
@@ -8,7 +8,8 @@ const HospitalHome = () => {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-  const hospitalId = "22510046"; // Replace this with actual hospital ID or dynamic logic
+  // const hospitalId = "22510046"; // Replace this with actual hospital ID or dynamic logic
+  const {hospitalId} = useParams();
 
   useEffect(() => {
     const fetchHospitalReservationInfo = async () => {
@@ -27,7 +28,7 @@ const HospitalHome = () => {
 
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching reservation data:", error?.response?.data?.message || error);
+        // console.error("Error fetching reservation data:", error?.response?.data?.message || error);
         setLoading(false);
       }
     };
@@ -39,7 +40,7 @@ const HospitalHome = () => {
   if (error && reservations.length === 0) return <p>{error}</p>; // Show error only if there's no data
 
   const handleClick = () => {
-    navigate('/hospital-form');
+    navigate(`/hospital-form/${hospitalId}`);
   };
 
   return (

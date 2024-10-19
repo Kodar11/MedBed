@@ -14,11 +14,11 @@ function InsuranceForm({ data ,check }) {
     },
   ]);
 
-//   useEffect(() => {
-//     if (data) {
-//       setInsuranceData(data); // Preload the form data when available
-//     }
-// }, [data]);
+  useEffect(() => {
+    if (data) {
+      setInsuranceData(data); // Preload the form data when available
+    }
+}, [data]);
 
   const handleChange = (index, e) => {
     const { name, value, type, checked } = e.target;
