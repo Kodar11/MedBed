@@ -55,6 +55,16 @@ CREATE TABLE "Hospital" (
 );
 
 -- CreateTable
+CREATE TABLE "HospitalLogin" (
+    "id" TEXT NOT NULL,
+    "hospital_id" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "refresh_token" TEXT NOT NULL,
+
+    CONSTRAINT "HospitalLogin_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Customization" (
     "id" VARCHAR(255) NOT NULL,
     "hospital_id" VARCHAR(255) NOT NULL,

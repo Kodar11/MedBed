@@ -1,23 +1,32 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 function HospitalLogin() {
   const [hospitalId, setHospitalId] = useState('');
   const [password, setPassword] = useState('');
-
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Hospital ID:", hospitalId);
-    console.log("Password:", password);
+    try {
+      const response = await axios.post('http://localhost:3000/api/v1/hospitals/login', {
+        hospital_id: hospitalId,
+        password: password
+      });
 
-    
-
-    if(hospitalId == "UIAMS" && password == "123456"){
-      navigate("/hospital-home");
+      // Handle successful login
+      if (response.status === 200) {
+        // Navigate to the hospital home page on successful login
+        navigate('/hospital-home');
+      } else {
+        setError('Invalid credentials');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Login failed. Please check your Hospital ID and Password.');
     }
-    
   };
 
   return (
@@ -47,6 +56,7 @@ function HospitalLogin() {
               required
             />
           </div>
+          {error && <p className="text-red-500">{error}</p>}
           <button
             type="submit"
             className="w-full bg-blue-600 text-white p-3 rounded-md shadow-md hover:bg-blue-700 transition-all"

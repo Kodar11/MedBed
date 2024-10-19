@@ -10,7 +10,6 @@ import HospitalDirection from "./components/HospitalDirection"
 
 function App() {
 
-
   return (
     <>
       <BrowserRouter>

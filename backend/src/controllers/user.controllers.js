@@ -283,11 +283,9 @@ const sendPaymentInfo = asyncHandler(async (req, res) => {
 });
 
 
-
-
 const getHospitalReservationInfo = asyncHandler(async (req, res) => {
   try {
-    const { hospitalId } = req.body;  // Get hospitalId from request params
+    const {hospitalId} = req.params;  // Get hospitalId from request params
 
     // Validate hospitalId input
     if (!hospitalId) {

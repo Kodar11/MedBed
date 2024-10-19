@@ -3,140 +3,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { prisma } from "../db/index.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { upload, deleteImage } from '../config/cloudinary.js';
-
-
-// const createHospital = asyncHandler(async (req, res) => {
-//     console.log("hello " , req.body)
-//     const {
-//         hospital,
-//         beds,
-//         doctor,
-//         medicalEquipment,
-//         service,
-//         insurance,
-//     } = req.body;
-
-//     console.log( hospital,
-//         beds,
-//         doctor,
-//         medicalEquipment,
-//         service,
-//         insurance);
-
-//     // const mainImagePath = req.files.mainImage ? req.files.mainImage.path : null;
-//     // const subImagePaths = req.files.subImages ? req.files.subImages.map(file => file.path) : [];
-
-//     // extra code 
-//     // const mainImagePath = req.files.mainImage ? req.files.mainImage[0] : null;
-//     // const subImagePaths = req.files.subImages ? req.files.subImages : [];
-//       // extra code ends
-
-//     try {
-//         // Validate required hospital fields
-//         // if (!hospital.name || !hospital.address || !hospital.city || !hospital.state || !hospital.zip_code || !hospital.contact_number || !hospital.type) {
-//         //     throw new ApiError(400, "Missing required hospital fields");
-//         // }
-
-//         // // Validate required bed fields
-//         // if (beds.total_beds === undefined || beds.available_beds === undefined || !beds.bed_type) {
-//         //     throw new ApiError(400, "Missing required bed fields");
-//         // }
-
-//         // // Validate required doctor fields
-//         // if (!doctor.specialization || !doctor.qualification || doctor.experience_years === undefined || !doctor.availability) {
-//         //     throw new ApiError(400, "Missing required doctor fields");
-//         // }
-
-//         // // Validate required medical equipment fields
-//         // if (!medicalEquipment.equipment_name || !medicalEquipment.equipment_type || medicalEquipment.certification_status === undefined) {
-//         //     throw new ApiError(400, "Missing required medical equipment fields");
-//         // }
-
-//         // // Validate required service fields
-//         // if (!service.service_name || service.availability === undefined) {
-//         //     throw new ApiError(400, "Missing required service fields");
-//         // }
-
-//         // // Validate required insurance fields
-//         // if (!insurance.insurance_company || !insurance.insurance_type_id) {
-//         //     throw new ApiError(400, "Missing required insurance fields");
-//         // }
-
-//         // Check for existing hospital
-//         // const existingHospital = await prisma.hospital.findUnique({
-//         //     where: { email: hospital.email }
-//         // });
-
-//         // if (existingHospital) {
-//         //     throw new ApiError(409, "A hospital with this email already exists");
-//         // }
-
-//         // Upload images to Cloudinary
-//         // const uploadedMainImage = mainImagePath ? await upload(mainImagePath) : null;
-//         // const uploadedSubImages = await Promise.all(subImagePaths.map(path => upload(path)));
-
-//         // Create the hospital
-//         // console.log(hospital)
-//         const createdHospital = await prisma.hospital.create({
-//             data: { 
-//                 ...hospital,
-//                 // mainImage: uploadedMainImage ? uploadedMainImage.secure_url : null,
-//                 // subImages: uploadedSubImages.map(img => img.secure_url),
-//             },
-//         });
-
-//         // Create bed info
-//         const createdBedInfo = await prisma.bedInfo.create({
-//             data: {
-//                 hospital_id: createdHospital.id,
-//                 ...beds,
-//             },
-//         });
-
-//         // Create doctor
-//         const createdDoctor = await prisma.doctor.create({
-//             data: {
-//                 hospital_id: createdHospital.id,
-//                 ...doctor,
-//             },
-//         });
-
-//         // Create medical equipment
-//         const createdMedicalEquipment = await prisma.medicalEquipment.create({
-//             data: {
-//                 hospital_id: createdHospital.id,
-//                 ...medicalEquipment,
-
-//             },
-//         });
-
-//         // Create service
-//         const createdService = await prisma.service.create({
-//             data: {
-//                 hospital_id: createdHospital.id,
-//                 ...service,
-//             },
-//         });
-
-//         // Create insurance record
-//         const createdInsurance = await prisma.insurance.create({
-//             data: {
-//                 hospital_id: createdHospital.id,
-//                 ...insurance,
-//             },
-//         });
-
-//         // Respond with the created hospital and related data
-//         return res.status(201).json(new ApiResponse(201, {
-//             createdHospital, createdBedInfo, createdDoctor, createdMedicalEquipment, createdService, createdInsurance 
-//         }, "Hospital created successfully"));
-//     } 
-//     catch (error) {
-//         console.error('Error creating hospital:', error);
-//         throw new ApiError(400, 'Error creating hospital: ' + error.message);
-//     }
-// });
-
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -177,6 +43,36 @@ function generateRefreshToken(user) {
     }
   );
 }
+
+const generateAccessAndRefreshTokens = async (id) => {
+
+    console.log(id);
+    
+    try {
+      const user = await prisma.hospitalLogin.findUnique({
+        where: { id: id },
+      });
+  
+      if (!user) {
+        throw new ApiError(404, "User not found");
+      }
+  
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+  
+      await prisma.hospitalLogin.update({
+        where: { id: id },
+        data: { refresh_token: refreshToken },  // Corrected field name
+      });
+  
+      return { accessToken, refreshToken };
+  
+    } catch (error) {
+      console.error("Error generating tokens:", error);  // Log the error
+      throw new ApiError(500, "Something went wrong while generating tokens");
+    }
+  };
+  
 
 const createHospital = asyncHandler(async (req, res) => {
     console.log(req.body);
@@ -612,7 +508,7 @@ const loginHospital = asyncHandler(async (req, res) => {
   
     // Find the hospital login details based on the hospital_id
     const hospitalLogin = await prisma.hospitalLogin.findFirst({
-      where: {  id : hospital_id }
+      where: {  hospital_id : hospital_id, password: password}
     });
   
     if (!hospitalLogin) {
@@ -630,14 +526,8 @@ const loginHospital = asyncHandler(async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(hospitalLogin.id);
   
     // Retrieve hospital details for the response
-    const loggedInHospital = await prisma.hospital.findUnique({
-      where: { id: hospitalLogin.hospital_id },
-      select: {
-        id: true,
-        name: true,
-        address: true,
-        contact_number: true,
-      }
+    const loggedInHospital = await prisma.hospitalLogin.findUnique({
+      where: { id: hospitalLogin.id }
     });
   
     const options = {
@@ -647,7 +537,7 @@ const loginHospital = asyncHandler(async (req, res) => {
     };
   
     // Send the tokens via cookies
-    res.cookie("accessToken", accessToken, options);
+    res.cookie("accessToken", accessToken);
     
     return res.status(200).json(
       new ApiResponse(
