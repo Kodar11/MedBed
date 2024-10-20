@@ -212,10 +212,10 @@ const createHospital = asyncHandler(async (req, res) => {
         return res.status(201).json(new ApiResponse(201, {
             hospital: createdHospital,
             beds: await prisma.bedInfo.findMany({ where: { hospital_id: createdHospital.id } }),
-            doctor: createdDoctor,
-            medicalEquipment: createdMedicalEquipment,
-            service: createdService,
-            insurance: createdInsurance,
+            doctor: doctorPromises,
+            medicalEquipment: medicalEquipmentPromises,
+            service: servicePromises,
+            insurance: insurancePromises,
         }, "Hospital created successfully"));
     } catch (error) {
         console.error('Error creating hospital:', error);
