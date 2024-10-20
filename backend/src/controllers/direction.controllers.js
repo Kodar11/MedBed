@@ -36,7 +36,7 @@ const storeEndLocation = async (req, res) => {
             data: {
                 id: id,
                 name: end,
-                islocation: true,
+                
             },
         });
 

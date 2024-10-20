@@ -12,11 +12,11 @@ function ServiceForm({data, check}) {
     },
   ]);
 
-//   useEffect(() => {
-//     if (data) {
-//       setServiceData(data); // Preload the form data when available
-//     }
-// }, [data]);
+  useEffect(() => {
+    if (data) {
+      setServiceData(data); // Preload the form data when available
+    }
+}, [data]);
 
   const handleChange = (index, e) => {
     const { name, value, type, checked } = e.target;

@@ -14,12 +14,12 @@ function BedInfoForm({ data, check }) {
     },
   ]);
 
-  // useEffect(() => {
-  //   if (data) {
-  //     setBedData(data); // Preload the form data when available
-  //     setBedNo(data.length + 1); // Adjust bed number based on preloaded data
-  //   }
-  // }, [data]);
+  useEffect(() => {
+    if (data) {
+      setBedData(data); // Preload the form data when available
+      setBedNo(data.length + 1); // Adjust bed number based on preloaded data
+    }
+  }, [data]);
 
   const handleChange = (index, e) => {
     const { name, value } = e.target;

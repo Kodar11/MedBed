@@ -54,6 +54,8 @@ const BedReservations = () => {
         // Handle the received data
         if (data && data.data) {
           setReservations([data.data]); // Wrap the object in an array
+          console.log(data.data);
+          
         } else {
           setReservations([]);
         }
@@ -88,16 +90,18 @@ const BedReservations = () => {
                     <div className="flex justify-between items-center max-sm:flex-col">
                       <div className="max-sm:mb-2">
                         <h4 className="font-semibold text-lg max-sm:text-base">
-                          Payment ID: {reservation.paymentId || "Not available"}
+                          Payment ID: {reservation.payment_id || "Not available"}
                         </h4>
                         <p className="text-gray-600 max-sm:text-sm">
-                          Bed Reservation Time: {reservation.reservationTime
-                            ? new Date(reservation.reservationTime).toLocaleString()
+                          Bed Reservation Time: {reservation.bed_reservation_time
+                            ? new Date(reservation.bed_reservation_time
+                            ).toLocaleString()
                             : "Not available"}
                         </p>
                         <p className="text-gray-600 max-sm:text-sm">
-                          Check-In Time: {reservation.checkInTime
-                            ? new Date(reservation.checkInTime).toLocaleString()
+                          Check-In Time: {reservation.check_in_time
+                            ? new Date(reservation.
+                              check_in_time).toLocaleString()
                             : "Not yet checked in"}
                         </p>
                         <p className="text-gray-600 max-sm:text-sm">
@@ -106,9 +110,9 @@ const BedReservations = () => {
                       </div>
                     </div>
                     <div className="text-gray-500 max-sm:text-sm">
-                      <p>Username: {reservation.user?.username || "N/A"}</p>
-                      <p>Email: {reservation.user?.email || "N/A"}</p>
-                      <p>Phone Number: {reservation.user?.phone_number || "N/A"}</p>
+                      <p>Username: {reservation.user_info?.username || "N/A"}</p>
+                      <p>Email: {reservation.user_info?.email || "N/A"}</p>
+                      <p>Phone Number: {reservation.user_info?.phone_number || "N/A"}</p>
                     </div>
                   </li>
                 );

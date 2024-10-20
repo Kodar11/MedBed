@@ -15,11 +15,11 @@ function DoctorForm({ data, check }) {
     },
   ]);
 
-//   useEffect(() => {
-//     if (data) {
-//       setDoctorData(data); // Preload the form data when available
-//     }  
-// }, [data]);
+  useEffect(() => {
+    if (data) {
+      setDoctorData(data); // Preload the form data when available
+    }  
+}, [data]);
 
   const handleChange = (index, e) => {
     const updatedDoctorData = [...doctorData];

@@ -19,7 +19,7 @@ function HospitalLogin() {
       // Handle successful login
       if (response.status === 200) {
         // Navigate to the hospital home page on successful login
-        navigate('/hospital-home');
+        navigate(`/hospital-home/${hospitalId}`);
       } else {
         setError('Invalid credentials');
       }
