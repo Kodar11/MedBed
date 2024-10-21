@@ -42,6 +42,10 @@ function NavBar() {
         navigate("/login");
     };
 
+    const handleHome = async () => {
+        navigate("/");
+    }
+
     return (
         <>
             {screenSize > 600 && (
@@ -51,6 +55,7 @@ function NavBar() {
                         <div className="flex gap-4 font-medium cursor-pointer">
                             <Link to="/reservations">Reservations</Link>
                             <div onClick={handleLogOut} className="cursor-pointer">Logout</div> {/* Trigger logout on click */}
+                            <div onClick={handleHome} className="cursor-pointer">Home</div>
                         </div>
                     </div>
                     <div>
@@ -94,6 +99,7 @@ function NavBar() {
                             <div className="flex gap-4 font-medium cursor-pointer">
                                 <Link to="/reservations">Reservations</Link>
                                 <div onClick={handleLogOut} className="cursor-pointer">Logout</div> {/* Trigger logout on click */}
+                                <div onClick={handleHome} className="cursor-pointer">Home</div>
                             </div>
                         </div>
                     </nav>

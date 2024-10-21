@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import NavBar from "./NavBar"
 
 const HospitalDetails = () => {
   const { id } = useParams();
@@ -32,12 +33,13 @@ const HospitalDetails = () => {
 
   return (
     <div className='h-full bg-blue-50'>
+      <NavBar/>
     <div className="max-w-5xl mx-auto my-12 p-8 bg-white rounded-lg shadow-xl">
       {/* Hospital Information */}
       <h2 className="text-4xl font-extrabold mb-6 text-blue-700 text-center">{hospital.name}</h2>
 
       <div className="space-y-4 text-gray-700 text-center mb-12">
-        <p className="text-lg"><strong className="font-bold">Location:</strong> {hospital.address}, {hospital.city}, {hospital.state}, {hospital.zip_code}</p>
+        <p className="text-lg"><strong className="font-bold">Location:</strong> {hospital.address}</p>
         <p className="text-lg"><strong className="font-bold">Contact:</strong> {hospital.contact_number}</p>
         <p className="text-lg"><strong className="font-bold">Email:</strong> {hospital.email}</p>
         <p className="text-lg"><strong className="font-bold">Website:</strong> <a href={`http://${hospital.website}`} className="text-blue-500 hover:text-blue-700">{hospital.website}</a></p>
