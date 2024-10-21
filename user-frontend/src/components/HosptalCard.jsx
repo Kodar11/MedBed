@@ -82,8 +82,8 @@ const HospitalCard = ({ hospital }) => {
             maxHeight: screenSize > 600 ? '350px' : 'auto'
         }}
     >
-        <div onClick={handleClick} className="flex-2 text-center md:text-left">
-            <h2 className="text-xl md:text-2xl font-semibold mb-2 mr-4">
+        <div className="flex-2 text-center md:text-left">
+            <h2 onClick={handleClick} className="text-xl md:text-2xl font-semibold mb-2 mr-4 cursor-pointer ">
                 {hospital.hospital.name}
             </h2>
             <p className="text-sm md:text-base mb-2">{hospital.hospital.address}</p>
@@ -95,7 +95,6 @@ const HospitalCard = ({ hospital }) => {
             </p>
         </div>
 
-        {/* For larger screens */}
         {screenSize > 600 && (
             <div className="flex justify-between items-center space-x-4">
                 <div className="flex flex-col text-center items-center justify-center">
@@ -105,7 +104,6 @@ const HospitalCard = ({ hospital }) => {
                     <p className="text-sm">Available Beds</p>
                 </div>
 
-                {/* Reserve Bed Icon */}
                 <div className="flex flex-col justify-around items-center">
                     <div
                         className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center cursor-pointer"

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import HospitalCard from '../components/HosptalCard';
 import axios from 'axios';
+import Loading from './Loading'; // Import the Loading component
 
 
 const HospitalList = () => {
@@ -22,16 +23,15 @@ const HospitalList = () => {
     };
 
     // Fetch available beds initially and every 10 seconds
-        
-        const interval = setInterval(fetchHospitalData, 10000); // Fetch every 10 seconds
-
-        return () => clearInterval(interval); // Cleanup on unmount
+    const interval = setInterval(fetchHospitalData, 10000); // Fetch every 10 seconds
 
     fetchHospitalData();
+
+    return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>; // Display loading message while data is being fetched
+    return <Loading />; // Use the Loading component instead of the text
   }
 
   return (
