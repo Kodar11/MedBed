@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Assuming you're using axios for API calls
 import HospitalDirection from './HospitalDirection';
 
-const HospitalCard = ({ hospital }) => {
+const HospitalCard = ({ hospital,availableBeds }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [screenSize, setScreenSize] = useState(window.innerWidth);
-    const [availableBeds, setAvailableBeds] = useState(0); // State to hold the available beds
     const navigate = useNavigate(); 
+    
 
     useEffect(() => {
         // Function to update the screen size on window resize
@@ -20,26 +20,26 @@ const HospitalCard = ({ hospital }) => {
         };
     }, []);
 
-    useEffect(() => {
-        // Function to fetch available beds from the API
-        const fetchAvailableBeds = async () => {
-            console.log("0",hospital.hospital.id);
+    // useEffect(() => {
+    //     // Function to fetch available beds from the API
+    //     const fetchAvailableBeds = async () => {
+    //         console.log("0",hospital.hospital.id);
             
-            try {
-                const response = await axios.get(`http://localhost:3000/api/hospitals/${hospital.hospital.id}/available-beds`); // Adjust the endpoint as necessary
-                setAvailableBeds(response.data.availableBeds); // Assuming your API returns { availableBeds: number }
-            } catch (error) {
-                console.error("Error fetching available beds", error);
-            }
-        };
+    //         try {
+    //             const response = await axios.get(`http://localhost:3000/api/hospitals/${hospital.hospital.id}/available-beds`); // Adjust the endpoint as necessary
+    //             setAvailableBeds(response.data.availableBeds); // Assuming your API returns { availableBeds: number }
+    //         } catch (error) {
+    //             console.error("Error fetching available beds", error);
+    //         }
+    //     };
 
-        // Fetch available beds initially and every 10 seconds
-        fetchAvailableBeds();
-        // const interval = setInterval(fetchAvailableBeds, 100000); // Fetch every 10 seconds
+    //     // Fetch available beds initially and every 10 seconds
+    //     fetchAvailableBeds();
+    //     // const interval = setInterval(fetchAvailableBeds, 100000); // Fetch every 10 seconds
 
-        // return () => clearInterval(interval); // Cleanup on unmount
-        // return () => clearInterval(interval); // Cleanup on unmount
-    }, [hospital.hospital.id]); // Dependency array ensures this runs when hospital ID changes
+    //     // return () => clearInterval(interval); // Cleanup on unmount
+    //     // return () => clearInterval(interval); // Cleanup on unmount
+    // }, [hospital.hospital.id]); // Dependency array ensures this runs when hospital ID changes
 
     if (!hospital) {
         return <p>No hospital data available.</p>; // Handle case where no hospital data is passed

@@ -8,7 +8,9 @@ import {
     sendPaymentInfo,
     createBedReservation,
     getHospitalReservationInfo,
-    searchHospitals
+    searchHospitals,
+    getAvailableBeds,
+    handleIncomingNotifications
 } from "../controllers/user.controllers.js"
 
 
@@ -24,6 +26,8 @@ router.route("/get-payment-info-user/:id").get(sendPaymentInfo)
 router.route("/get-payment-info-hospital/:hospitalId").get(getHospitalReservationInfo)
 router.route("/create-bed-reservation").post(verifyJWT,createBedReservation)
 
+router.route("/notify").post(handleIncomingNotifications)
+router.route("/getAvailbleBeds").get(getAvailableBeds)
 
 router.route("/search-hospital").get(searchHospitals)
 

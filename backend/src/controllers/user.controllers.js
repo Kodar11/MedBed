@@ -4,7 +4,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { PrismaClient } from '@prisma/client';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-
 const prisma = new PrismaClient();
 
 async function hashPassword(password) {
@@ -351,10 +350,14 @@ const getHospitalReservationInfo = asyncHandler(async (req, res) => {
 const createBedReservation = asyncHandler(async (req, res) => {
   const { paymentId, userId, hospitalId } = req.body; // Expecting paymentId, userId, and hospitalId in the request body
 
-  console.log("Payment Id : ",paymentId);
-  console.log("user Id : ",userId);
-  console.log("Hospital Id : ",hospitalId);
-  
+  // Convert hospitalId to a string to ensure consistency with notifications object
+  const formattedHospitalId = String(hospitalId);
+
+  // Debugging Logs
+  console.log("Payment Id : ", paymentId);
+  console.log("User Id : ", userId);
+  console.log("Hospital Id : ", formattedHospitalId);
+  console.log("Complete Notifications Object: ", notifications);
 
   // Validate input fields
   if (!paymentId || !userId || !hospitalId) {
@@ -362,7 +365,49 @@ const createBedReservation = asyncHandler(async (req, res) => {
   }
 
   try {
-    // Create a new bed reservation with the provided hospitalId and userId
+    // Verify if the hospital exists
+    const hospitalExists = await prisma.hospital.findUnique({
+      where: { id: formattedHospitalId },
+    });
+
+    if (!hospitalExists) {
+      return res.status(404).json({ message: "Hospital not found." });
+    }
+
+    // Check if we have updated bed data for the hospital from the webhook
+    if (!notifications[formattedHospitalId]) {
+      return res.status(400).json({ message: "No bed availability data for this hospital." });
+    }
+
+    // Retrieve the latest available beds count from the notifications object
+    const availableBeds = notifications[formattedHospitalId];
+
+    // Debugging log for the available beds
+    console.log(`Available beds for hospital ${formattedHospitalId}:`, availableBeds);
+
+    // Check if no beds are available
+    if (availableBeds <= 0) {
+      return res.status(400).json({ message: "No beds available for reservation at this hospital." });
+    }
+    console.log("392");
+    
+    // Check how many reservations already exist for this hospital
+    const currentReservations = await prisma.bedReservation.count({
+      where: {
+        hospitalId: formattedHospitalId,
+        check_in: false, // Assuming reservations that aren't checked in yet
+      },
+    });
+
+    // Debugging log for the current reservations
+    console.log(`Current reservations for hospital ${formattedHospitalId}:`, currentReservations);
+
+    // If current reservations exceed or match the available beds, block the reservation
+    if (currentReservations >= availableBeds) {
+      return res.status(400).json({ message: "All available beds are already reserved." });
+    }
+
+    // Create a new bed reservation
     const newReservation = await prisma.bedReservation.create({
       data: {
         paymentId: paymentId,
@@ -371,7 +416,7 @@ const createBedReservation = asyncHandler(async (req, res) => {
         check_in: false, // Default false
         late_patient: false, // Default false
         userId: userId, // Associate with the user
-        hospitalId: hospitalId, // Associate with the hospital
+        hospitalId: formattedHospitalId, // Associate with the hospital
       },
     });
 
@@ -383,15 +428,66 @@ const createBedReservation = asyncHandler(async (req, res) => {
       checkInTime: newReservation.checkInTime,
       check_in: newReservation.check_in,
       late_patient: newReservation.late_patient,
-      userId: newReservation.userId,        // Include userId in the response
-      hospitalId: newReservation.hospitalId // Include hospitalId in the response
+      userId: newReservation.userId, // Include userId in the response
+      hospitalId: newReservation.hospitalId, // Include hospitalId in the response
     };
+
+    // Debugging log for the new reservation
+    console.log("New reservation created:", payload);
 
     // Respond with success message and reservation details
     res.status(201).json(new ApiResponse(201, payload, "Payment successful and reservation created."));
   } catch (error) {
     console.error("Error creating bed reservation:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+export const notifications = {}; // In-memory storage for notifications, using hospital_id as the key
+
+// Function to handle incoming notifications
+const handleIncomingNotifications = asyncHandler(async (req, res) => {
+    const { data, database } = req.body; // Destructure the incoming data and database index
+
+    // Store the incoming notification in memory
+    Object.keys(data).forEach(hospital_id => {
+        // Update notifications only if there's new data, otherwise, retain the existing value
+        notifications[hospital_id] = data[hospital_id] || notifications[hospital_id];
+    });
+
+    console.log(`Received notification for database ${database}. Updated counters:`, notifications);
+
+    res.status(200).send({ message: "Notification received and stored" });
+});
+
+// Function to get available beds (key: hospital_id, value: availableBeds)
+const getAvailableBeds = asyncHandler(async (req, res) => {
+  try {
+      // Create a new object to hold updated notifications
+      const updatedNotifications = {};
+
+      // Loop through the notifications and get reservation counts
+      for (const hospital_id in notifications) {
+          // Fetch the number of reservations for this hospital
+          const reservationCount = await prisma.bedReservation.count({
+              where: {
+                  hospitalId: hospital_id,
+              },
+          });
+
+          // Get the current available bed count from the notifications
+          const availableBeds = notifications[hospital_id] || 0; // Default to 0 if not defined
+
+          // Subtract the reservation count from the available beds and store the result as key-value
+          updatedNotifications[hospital_id] = availableBeds - reservationCount; // Key: hospital_id, Value: availableBeds after subtracting reservations
+      }
+
+      // Send the updated notifications object as JSON response
+      res.status(200).json(updatedNotifications);
+  } catch (error) {
+      console.error('Error fetching available beds and reservations:', error);
+      res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -419,81 +515,81 @@ const searchHospitals = async (req, res) => {
 };
 
 // In-memory map to cache the bed availability data
-let bedAvailability = new Map();
+// let bedAvailability = new Map();
 
-// Function to load bed data into the map from the BedInfo table
-const loadBedData = async () => {
-    const beds = await prisma.bedInfo.findMany();
-    beds.forEach(bed => {
-        bedAvailability.set(bed.hospital_id, bed.available_beds);
-    });
-};
+// // Function to load bed data into the map from the BedInfo table
+// const loadBedData = async () => {
+//     const beds = await prisma.bedInfo.findMany();
+//     beds.forEach(bed => {
+//         bedAvailability.set(bed.hospital_id, bed.available_beds);
+//     });
+// };
 
-// Load bed data into the map initially when the server starts
-loadBedData().catch(err => console.error(err));
+// // Load bed data into the map initially when the server starts
+// loadBedData().catch(err => console.error(err));
 
 // Endpoint to get available beds for a specific hospital
-const getAvailableBeds = asyncHandler(async (req, res) => {
-    const id = req.params.id; // Extract hospital ID from the URL
+// const getAvailableBeds = asyncHandler(async (req, res) => {
+//     const id = req.params.id; // Extract hospital ID from the URL
 
-    // Check if the ID exists in the in-memory map
-    if (!bedAvailability.has(id)) {
-        return res.status(404).json({ message: `Hospital ID ${id} not found.` });
-    }
+//     // Check if the ID exists in the in-memory map
+//     if (!bedAvailability.has(id)) {
+//         return res.status(404).json({ message: `Hospital ID ${id} not found.` });
+//     }
 
-    const availableBeds = bedAvailability.get(id);
-    return res.status(200).json({ availableBeds });
-});
+//     const availableBeds = bedAvailability.get(id);
+//     return res.status(200).json({ availableBeds });
+// });
 
-// Endpoint to increment the available beds for a specific hospital
-const incrementBeds = asyncHandler(async (req, res) => {
-    const id = req.params.id;
+// // Endpoint to increment the available beds for a specific hospital
+// const incrementBeds = asyncHandler(async (req, res) => {
+//     const id = req.params.id;
 
-    // Check if the ID exists in the map
-    if (!bedAvailability.has(id)) {
-        return res.status(404).json({ message: `Hospital ID ${id} not found.` });
-    }
+//     // Check if the ID exists in the map
+//     if (!bedAvailability.has(id)) {
+//         return res.status(404).json({ message: `Hospital ID ${id} not found.` });
+//     }
 
-    // Increment the available beds in memory and update the database
-    let currentBeds = bedAvailability.get(id);
-    bedAvailability.set(id, currentBeds + 1);
+//     // Increment the available beds in memory and update the database
+//     let currentBeds = bedAvailability.get(id);
+//     bedAvailability.set(id, currentBeds + 1);
 
-    await prisma.bedInfo.update({
-        where: { hospital_id: id },
-        data: { available_beds: currentBeds + 1 },
-    });
+//     await prisma.bedInfo.update({
+//         where: { hospital_id: id },
+//         data: { available_beds: currentBeds + 1 },
+//     });
 
-    return res
-        .status(200)
-        .json({ message: `Available beds for Hospital ID ${id} incremented. Current value: ${bedAvailability.get(id)}` });
-});
+//     return res
+//         .status(200)
+//         .json({ message: `Available beds for Hospital ID ${id} incremented. Current value: ${bedAvailability.get(id)}` });
+// });
 
-// Endpoint to decrement the available beds for a specific hospital
-const decrementBeds = asyncHandler(async (req, res) => {
-    const id = req.params.id;
+// // Endpoint to decrement the available beds for a specific hospital
+// const decrementBeds = asyncHandler(async (req, res) => {
+//     const id = req.params.id;
 
-    // Check if the ID exists in the map
-    if (!bedAvailability.has(id)) {
-        return res.status(404).json({ message: `Hospital ID ${id} not found.` });
-    }
+//     // Check if the ID exists in the map
+//     if (!bedAvailability.has(id)) {
+//         return res.status(404).json({ message: `Hospital ID ${id} not found.` });
+//     }
 
-    let currentBeds = bedAvailability.get(id);
-    if (currentBeds > 0) {
-        bedAvailability.set(id, currentBeds - 1);
+//     let currentBeds = bedAvailability.get(id);
+//     if (currentBeds > 0) {
+//         bedAvailability.set(id, currentBeds - 1);
 
-        // Update the database with the decremented value
-        await prisma.bedInfo.update({
-            where: { hospital_id: id },
-            data: { available_beds: currentBeds - 1 },
-        });
+//         // Update the database with the decremented value
+//         await prisma.bedInfo.update({
+//             where: { hospital_id: id },
+//             data: { available_beds: currentBeds - 1 },
+//         });
 
-        return res.status(200).json({
-            message: `Available beds for Hospital ID ${id} decremented. Current value: ${bedAvailability.get(id)}`
-        });
-    } else {
-        return res.status(400).json({ message: `Available beds for Hospital ID ${id} cannot be less than 0.` });
-    }
-});
+//         return res.status(200).json({
+//             message: `Available beds for Hospital ID ${id} decremented. Current value: ${bedAvailability.get(id)}`
+//         });
+//     } else {
+//         return res.status(400).json({ message: `Available beds for Hospital ID ${id} cannot be less than 0.` });
+//     }
+// });
 
 
 export {
@@ -504,8 +600,6 @@ export {
   createBedReservation,
   getHospitalReservationInfo,
   searchHospitals,
-  loadBedData,
   getAvailableBeds,
-  incrementBeds,
-  decrementBeds
+  handleIncomingNotifications
 };

@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 const app = express();
@@ -94,24 +93,65 @@ app.use('/api/v1/direction', directionRouter);
 //     res.send(`Available beds for Hospital ID ${id} have been decremented. Current value: ${bedAvailability.get(id)}`);
 // });
 
-let notifications = {}; // In-memory storage for notifications, using hospital_id as the key
+// export const notifications = {}; // In-memory storage for notifications, using hospital_id as the key
 
-// Endpoint to receive data from the webhook
-app.post("/notify", (req, res) => {
-    const { data, database } = req.body; // Destructure the incoming data and database index
+// // Endpoint to receive data from the webhook
+// app.post("/notify", (req, res) => {
+//     const { data, database } = req.body; // Destructure the incoming data and database index
 
-    // Store the incoming notification in memory
-    Object.keys(data).forEach(hospital_id => {
-        notifications[hospital_id] = data[hospital_id]; // Store the latest counter for each hospital
-    });
+//     // Store the incoming notification in memory
+//     Object.keys(data).forEach(hospital_id => {
+//         // Update notifications only if there's new data, otherwise, retain the existing value
+//         notifications[hospital_id] = data[hospital_id] || notifications[hospital_id];
+//     });
 
-    console.log(`Received notification for database ${database}. Updated counters:`, notifications);
+//     console.log(`Received notification for database ${database}. Updated counters:`, notifications);
 
-    res.status(200).send({ message: "Notification received and stored" });
-});
+//     res.status(200).send({ message: "Notification received and stored" });
+// });
+
+// // Endpoint to get available beds and reservation counts
+// app.get('/api/hospitals/available-beds', async (req, res) => {
+//     try {
+//         // Create a new object to hold updated notifications
+//         const updatedNotifications = {};
+
+//         // Loop through the notifications and get reservation counts
+//         for (const hospital_id in notifications) {
+//             // Fetch the number of reservations for this hospital
+//             const reservationCount = await prisma.bedReservation.count({
+//                 where: {
+//                     hospitalId: hospital_id,
+//                 },
+//             });
+
+//             // Get the current available bed count from the notifications
+//             const availableBeds = notifications[hospital_id].available_beds || 0; // Default to 0 if not defined
+
+//             // Subtract the reservation count from the available beds and store the result
+//             updatedNotifications[hospital_id] = {
+//                 availableBeds: availableBeds - reservationCount, // Subtract reservations from available beds
+//                 reservations: reservationCount, // Add reservation count for reference
+//             };
+//         }
+
+//         // Send the updated notifications object as JSON response
+//         res.status(200).json(updatedNotifications);
+//     } catch (error) {
+//         console.error('Error fetching available beds and reservations:', error);
+//         res.status(500).json({ message: "Internal server error" });
+//     }
+// });
 
 
+// const logNotifications = () => {
+//     setInterval(() => {
+//         console.log("Current notifications:", JSON.stringify(notifications, null, 2)); // Pretty-print the notifications
+//     }, 10000); // Log every 10 seconds
+// };
 
+// // Call the logging function at the start of your server or wherever appropriate
+// logNotifications();
 
 // Starting the server
 const PORT = process.env.PORT || 5000;
