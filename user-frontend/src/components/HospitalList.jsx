@@ -55,6 +55,8 @@
 import React, { useEffect, useState } from 'react';
 import HospitalCard from '../components/HosptalCard';
 import axios from 'axios';
+import Loading from './Loading'; // Import the Loading component
+
 
 const HospitalList = () => {
   const [allHospitals, setAllHospitals] = useState([]); // Store all hospitals
@@ -77,7 +79,12 @@ const HospitalList = () => {
       }
     };
 
+    // Fetch available beds initially and every 10 seconds
+    const interval = setInterval(fetchHospitalData, 10000); // Fetch every 10 seconds
+
     fetchHospitalData();
+
+    return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
   useEffect(() => {
@@ -109,7 +116,7 @@ const HospitalList = () => {
   };
 
   if (loading) {
-    return <p className="text-center text-xl text-gray-500">Loading...</p>; // Display loading message while data is being fetched
+    return <Loading />; // Use the Loading component instead of the text
   }
 
   return (
