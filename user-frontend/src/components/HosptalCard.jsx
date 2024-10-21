@@ -4,33 +4,17 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBed, faDirections, faAmbulance } from '@fortawesome/free-solid-svg-icons';
 
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faMapMarkerAlt, faPhone, faGlobe, faEnvelope, faHospital, faCertificate, faMedkit, faUserMd, faBed, faStethoscope, faHandHoldingMedical, faShieldAlt, faHeartbeat } from '@fortawesome/free-solid-svg-icons';
-
-const HospitalCard = ({ hospital }) => {
+const HospitalCard = ({ hospital,availableBeds }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [screenSize, setScreenSize] = useState(window.innerWidth);
-    const [availableBeds, setAvailableBeds] = useState(0);
     const navigate = useNavigate(); 
+    
 
     useEffect(() => {
         const handleResize = () => setScreenSize(window.innerWidth);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-
-    useEffect(() => {
-        const fetchAvailableBeds = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3000/api/hospitals/${hospital.hospital.id}/available-beds`);
-                setAvailableBeds(response.data.availableBeds);
-            } catch (error) {
-                console.error("Error fetching available beds", error);
-            }
-        };
-
-        fetchAvailableBeds();
-    }, [hospital.hospital.id]);
 
     if (!hospital) {
         return <p>No hospital data available.</p>;
