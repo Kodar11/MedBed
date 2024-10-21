@@ -4,6 +4,9 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBed, faDirections, faAmbulance } from '@fortawesome/free-solid-svg-icons';
 
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faMapMarkerAlt, faPhone, faGlobe, faEnvelope, faHospital, faCertificate, faMedkit, faUserMd, faBed, faStethoscope, faHandHoldingMedical, faShieldAlt, faHeartbeat } from '@fortawesome/free-solid-svg-icons';
+
 const HospitalCard = ({ hospital }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -52,9 +55,14 @@ const HospitalCard = ({ hospital }) => {
         navigate(`/hospital-details/${hospital.hospital.id}`);
     };
 
+    // const handleDirection = () => {
+    //     navigate(`/hospital-directions/${hospital.hospital.id}`);
+    // };
+
     const handleDirection = () => {
-        navigate(`/hospital-directions/${hospital.hospital.id}`);
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${hospital.hospital.name} ${hospital.hospital.address} ${hospital.hospital.city} ${hospital.hospital.state} ${hospital.hospital.zip_code}`)}`, '_blank');
     };
+    
 
     return (
         <div className='w-full flex justify-center items-center'>
@@ -102,7 +110,9 @@ const HospitalCard = ({ hospital }) => {
 
                         <div className="flex flex-col justify-around items-center">
                             <div className="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center">
-                                <FontAwesomeIcon icon={faDirections} className="w-6 h-6 text-blue-500" onClick={handleDirection} />
+                            <FontAwesomeIcon icon={faDirections} className="w-6 h-6 text-blue-500" onClick={handleDirection} />
+
+                                {/* onClick={handleDirection} */}
                             </div>
                             <p className="text-sm text-center">Directions</p>
                             <p className="text-sm text-center">Navigation</p>
@@ -161,5 +171,18 @@ const HospitalCard = ({ hospital }) => {
         </div>
     );
 };
+
+const InfoItem = ({ icon, text, link }) => (
+    <div className="flex items-center space-x-3 text-gray-700">
+      <FontAwesomeIcon icon={icon} className="text-teal-500 w-5 h-5 flex-shrink-0" />
+      {link ? (
+        <a href={link} target="_blank" rel="noopener noreferrer" className="hover:text-teal-600">
+          {text}
+        </a>
+      ) : (
+        <span>{text}</span>
+      )}
+    </div>
+  );
 
 export default HospitalCard;
