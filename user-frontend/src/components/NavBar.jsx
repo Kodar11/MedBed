@@ -1,157 +1,9 @@
-// import React, { useState, useEffect } from 'react';
-// import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
-// import axios from 'axios'; // Import axios for API requests
-
-// function NavBar() {
-//     const [screenSize, setScreenSize] = useState(window.innerWidth);
-//     const navigate = useNavigate(); // Initialize navigate for redirection
-
-//     useEffect(() => {
-//         // Function to update the screen size
-//         const handleResize = () => setScreenSize(window.innerWidth);
-
-//         // Add event listener for window resize
-//         window.addEventListener('resize', handleResize);
-
-//         // Cleanup event listener on component unmount
-//         return () => {
-//             window.removeEventListener('resize', handleResize);
-//         };
-//     }, []);
-
-//     // Handle log out functionality
-//     const handleLogOut = async () => {
-//         try {
-//             // Send a logout request to the server
-//             await axios.post('http://localhost:3000/api/v1/users/logout', {}, { withCredentials: true });
-//         } catch (error) {
-//             console.error('Error logging out:', error);
-//         }
-
-//         // Clear session and local storage
-//         sessionStorage.clear();
-//         localStorage.clear();
-
-//         // Manage browser history to prevent going back to protected pages
-    
-//         // window.onpopstate = function () {
-//         //     history.go(1);
-//         // };
-
-//         // Redirect user to the login page
-//         navigate("/login");
-//     };
-
-//     const handleHome = async () => {
-//         navigate("/");
-//     }
-
-//     return (
-//         <>
-//             {screenSize > 600 && (
-//                 <nav className="w-full p-4 flex justify-between bg-trust-color text-white">
-//                     <div className="flex justify-between gap-6 items-center">
-//                         <div className="text-xl font-semibold">MedBed</div>
-//                         <div className="flex gap-4 font-medium cursor-pointer">
-//                             <Link to="/reservations">Reservations</Link>
-//                             <div onClick={handleLogOut} className="cursor-pointer">Logout</div> {/* Trigger logout on click */}
-//                             <div onClick={handleHome} className="cursor-pointer">Home</div>
-//                         </div>
-//                     </div>
-//                     <div>
-//                         <form className="flex items-center gap-2">
-//                             <div className='w-full'>
-//                                 <input
-//                                     type="text"
-//                                     className="px-2 py-1 text-black bg-white rounded-sm "
-//                                     placeholder="Search..."
-//                                 />
-//                             </div>
-//                             <div>
-//                                 <button type="submit">
-//                                     <svg
-//                                         className="w-4 h-4"
-//                                         aria-hidden="true"
-//                                         xmlns="http://www.w3.org/2000/svg"
-//                                         fill="none"
-//                                         viewBox="0 0 20 20"
-//                                     >
-//                                         <path
-//                                             stroke="currentColor"
-//                                             strokeLinecap="round"
-//                                             strokeLinejoin="round"
-//                                             strokeWidth="2"
-//                                             d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-//                                         />
-//                                     </svg>
-//                                 </button>
-//                             </div>
-//                         </form>
-//                     </div>
-//                 </nav>
-//             )}
-
-//             {screenSize <= 600 && (
-//                 <div>
-//                     <nav className="w-full p-4 bg-trust-color text-white">
-//                         <div className="flex justify-between gap-6 items-center">
-//                             <div className="text-xl font-semibold">MedBed</div>
-//                             <div className="flex gap-4 font-medium cursor-pointer">
-//                                 <Link to="/reservations">Reservations</Link>
-//                                 <div onClick={handleLogOut} className="cursor-pointer">Logout</div> {/* Trigger logout on click */}
-//                                 <div onClick={handleHome} className="cursor-pointer">Home</div>
-//                             </div>
-//                         </div>
-//                     </nav>
-//                     <div className="p-4"> 
-//                         <form className="flex items-center gap-4 w-full">
-//                             <input
-//                                 type="text"
-//                                 className="flex-grow px-2 py-1 text-black bg-white rounded-sm outline outline-sky-500"
-//                                 placeholder="Search..."
-//                             />
-//                             <button type="submit" className="flex-shrink-0">
-//                                 <svg
-//                                     className="w-4 h-4"
-//                                     aria-hidden="true"
-//                                     xmlns="http://www.w3.org/2000/svg"
-//                                     fill="none"
-//                                     viewBox="0 0 20 20"
-//                                 >
-//                                     <path
-//                                         stroke="currentColor"
-//                                         strokeLinecap="round"
-//                                         strokeLinejoin="round"
-//                                         strokeWidth="2"
-//                                         d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-//                                     />
-//                                 </svg>
-//                             </button>
-//                         </form>
-//                     </div>
-//                 </div>
-//             )}
-//         </>
-//     );
-// }
-
-// export default NavBar;
-
-
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-function NavBar({ setSearchQuery }) {  // Accept setSearchQuery as a prop
-    const [screenSize, setScreenSize] = useState(window.innerWidth);
+function NavBar() {
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const handleResize = () => setScreenSize(window.innerWidth);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const handleLogOut = async () => {
         try {
@@ -164,102 +16,34 @@ function NavBar({ setSearchQuery }) {  // Accept setSearchQuery as a prop
         navigate("/login");
     };
 
-    const handleHome = async () => {
+    const handleHome = () => {
         navigate("/");
     };
 
-    const handleSearchChange = (e) => {
-        setSearchQuery(e.target.value); // Update the search query state
-    };
-
     return (
-        <>
-            {screenSize > 600 && (
-                <nav className="w-full p-4 flex justify-between bg-trust-color text-white">
-                    <div className="flex justify-between gap-6 items-center">
-                        <div className="text-xl font-semibold">MedBed</div>
-                        <div className="flex gap-4 font-medium cursor-pointer">
-                            <Link to="/reservations">Reservations</Link>
-                            <div onClick={handleLogOut} className="cursor-pointer">Logout</div>
-                            <div onClick={handleHome} className="cursor-pointer">Home</div>
-                        </div>
-                    </div>
-                    <div>
-                        <form className="flex items-center gap-2">
-                            <div className='w-full'>
-                                <input
-                                    type="text"
-                                    className="px-2 py-1 text-black bg-white rounded-sm"
-                                    placeholder="Search..."
-                                    onChange={handleSearchChange}  // Call handleSearchChange on input change
-                                />
-                            </div>
-                            <div>
-                                <button type="submit">
-                                    <svg
-                                        className="w-4 h-4"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path
-                                            stroke="currentColor"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </nav>
-            )}
-
-            {screenSize <= 600 && (
-                <div>
-                    <nav className="w-full p-4 bg-trust-color text-white">
-                        <div className="flex justify-between gap-6 items-center">
-                            <div className="text-xl font-semibold">MedBed</div>
-                            <div className="flex gap-4 font-medium cursor-pointer">
-                                <Link to="/reservations">Reservations</Link>
-                                <div onClick={handleLogOut} className="cursor-pointer">Logout</div>
-                                <div onClick={handleHome} className="cursor-pointer">Home</div>
-                            </div>
-                        </div>
-                    </nav>
-                    <div className="p-4"> 
-                        <form className="flex items-center gap-4 w-full">
-                            <input
-                                type="text"
-                                className="flex-grow px-2 py-1 text-black bg-white rounded-sm outline outline-sky-500"
-                                placeholder="Search..."
-                                onChange={handleSearchChange}  // Call handleSearchChange on input change
-                            />
-                            <button type="submit" className="flex-shrink-0">
-                                <svg
-                                    className="w-4 h-4"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                    />
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
+        <nav className="w-full p-4 flex justify-between items-center bg-trust-color text-white">
+            <div className="text-2xl font-bold tracking-wide">MedBed</div>
+            <div className="flex gap-6 font-medium cursor-pointer items-center">
+                <div 
+                    onClick={handleHome} 
+                    className="transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-300"
+                >
+                    Home
                 </div>
-            )}
-        </>
+                <Link 
+                    to="/reservations" 
+                    className="transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-300"
+                >
+                    Reservations
+                </Link>
+                <div 
+                    onClick={handleLogOut} 
+                    className="border border-blue-500 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out shadow-md transform hover:scale-105"
+                >
+                    Logout
+                </div>
+            </div>
+        </nav>
     );
 }
 

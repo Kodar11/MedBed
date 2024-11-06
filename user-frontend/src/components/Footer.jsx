@@ -6,28 +6,28 @@ const Footer = () => {
     <footer className="bg-blue-600 text-gray-300 py-8 font-sans">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
+          <div className="flex flex-col items-center md:items-start">
             <h3 className="text-lg font-semibold mb-4 text-white">About Us</h3>
-            <p className="text-sm leading-relaxed">
+            <p className="text-sm leading-relaxed text-center md:text-left">
               We are dedicated to providing quick and easy access to hospital information and bed availability, ensuring better healthcare for all.
             </p>
           </div>
-          <div>
+          <div className="flex flex-col items-center md:items-start">
             <h3 className="text-lg font-semibold mb-4 text-white">Quick Links</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-2 text-center md:text-left">
               <li><Link to="/" className="hover:text-white transition duration-300">Home</Link></li>
               <li><Link to="/hospitals" className="hover:text-white transition duration-300">Hospitals</Link></li>
               <li><Link to="/about" className="hover:text-white transition duration-300">About</Link></li>
               <li><Link to="/contact" className="hover:text-white transition duration-300">Contact</Link></li>
             </ul>
           </div>
-          <div>
+          <div className="flex flex-col items-center md:items-start">
             <h3 className="text-lg font-semibold mb-4 text-white">Contact Us</h3>
-            <p className="text-sm mb-2">Email: info@example.com</p>
-            <p className="text-sm mb-2">Phone: (123) 456-7890</p>
-            <p className="text-sm">Address: 123 Hospital St, City, Country</p>
+            <p className="text-sm mb-2 text-center md:text-left">Email: info@example.com</p>
+            <p className="text-sm mb-2 text-center md:text-left">Phone: (123) 456-7890</p>
+            <p className="text-sm text-center md:text-left">Address: 123 Hospital St, City, Country</p>
           </div>
-          <div>
+          <div className="flex flex-col items-center md:items-start">
             <h3 className="text-lg font-semibold mb-4 text-white">Follow Us</h3>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition duration-300">
