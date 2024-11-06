@@ -99,25 +99,30 @@ const HospitalList = () => {
       </div>
 
       {/* City Filter Dropdown */}
-      <div className="mb-8 text-center">
-        <label htmlFor="city-filter" className="text-lg font-semibold text-gray-700">Filter by City:</label>
-        <select
-          id="city-filter"
-          className="ml-2 p-2 rounded border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onChange={handleCityChange}
-          value={city}
-        >
-          <option value="">All Cities</option>
-          <option value="Sangli">Sangli</option>
-          <option value="Mumbai">Mumbai</option>
-          <option value="Ratnagiri">Ratnagiri</option>
-          <option value="Pune">Pune</option>
-          {/* Add more city options based on your data */}
-        </select>
+      <div className="mb-8 flex justify-end">
+        <div className="relative">
+          <select
+            id="city-filter"
+            className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            onChange={handleCityChange}
+            value={city}
+          >
+            <option value="">All Cities</option>
+            <option value="Sangli">Sangli</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Ratnagiri">Ratnagiri</option>
+            <option value="Pune">Pune</option>
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+            </svg>
+          </div>
+        </div>
       </div>
 
       {/* Hospital Cards */}
-      <div className="flex flex-col">
+      <div className="flex flex-col space-y-4">
         {paginatedHospitals.map((hospital, index) => (
           <HospitalCard 
             key={hospital.hospital.id} 
@@ -128,26 +133,44 @@ const HospitalList = () => {
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex justify-between items-center mt-10">
-        <button
-          className={`px-4 py-2 text-white font-bold rounded ${page === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
-          onClick={() => handlePageChange(page - 1)}
-          disabled={page === 1}
-        >
-          Previous
-        </button>
-
-        <span className="text-lg font-semibold text-gray-700">
-          Page {page} of {Math.ceil(filteredHospitals.length / hospitalsPerPage)}
-        </span>
-
-        <button
-          className={`px-4 py-2 text-white font-bold rounded ${page === Math.ceil(filteredHospitals.length / hospitalsPerPage) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
-          onClick={() => handlePageChange(page + 1)}
-          disabled={page === Math.ceil(filteredHospitals.length / hospitalsPerPage)}
-        >
-          Next
-        </button>
+      <div className="flex justify-center items-center mt-8">
+        <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+          <button
+            className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+              page === 1
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-500 hover:bg-gray-50'
+            }`}
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+          >
+            Previous
+          </button>
+          {[...Array(Math.min(5, Math.ceil(filteredHospitals.length / hospitalsPerPage))).keys()].map((i) => (
+            <button
+              key={i}
+              className={`relative inline-flex items-center px-4 py-2 border ${
+                page === i + 1
+                  ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+              } text-sm font-medium`}
+              onClick={() => handlePageChange(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+              page === Math.ceil(filteredHospitals.length / hospitalsPerPage)
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-500 hover:bg-gray-50'
+            }`}
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === Math.ceil(filteredHospitals.length / hospitalsPerPage)}
+          >
+            Next
+          </button>
+        </nav>
       </div>
     </div>
   );

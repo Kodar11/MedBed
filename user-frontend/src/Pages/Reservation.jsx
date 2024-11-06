@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBed, faClock, faUser, faEnvelope, faPhone, faExclamationTriangle, faCopy, faShare, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 // Function to get a cookie by name
 const getCookie = (cookieName) => {
@@ -22,7 +26,7 @@ const decodeToken = (token) => {
 const BedReservations = () => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -49,14 +53,26 @@ const BedReservations = () => {
         }
 
         // Fetch reservations based on the userId
-        const { data } = await axios.get(`http://localhost:3000/api/v1/users/get-payment-info-user/${userId}`,);
+        const response = await axios.get(`http://localhost:3000/api/v1/users/get-payment-info-user/${userId}`);
         
+        console.log("Full API response:", response);
+        console.log("Response data:", response.data);
+        console.log("Response data.data:", response.data.data);
+
         // Handle the received data
-        if (data && data.data) {
-          setReservations([data.data]); // Wrap the object in an array
-          console.log(data.data);
+        if (response.data && response.data.data) {
+          let reservationsData = response.data.data;
           
+          // Ensure reservationsData is always an array
+          if (!Array.isArray(reservationsData)) {
+            console.warn("API returned a single object instead of an array. Converting to array.");
+            reservationsData = [reservationsData];
+          }
+
+          setReservations(reservationsData);
+          console.log("Set reservations:", reservationsData);
         } else {
+          console.warn("No reservation data found in the API response");
           setReservations([]);
         }
 
@@ -68,61 +84,121 @@ const BedReservations = () => {
     };
 
     fetchReservations();
-  }, []); // Empty dependency array to run this only on component mount
+  }, []);
 
-  if (loading) return <p>Loading...</p>;
+  const handleBackClick = () => {
+    navigate('/');
+  };
+
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <motion.div
+        className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+      ></motion.div>
+    </div>
+  );
 
   return (
-    <div className="p-4 flex justify-center min-h-screen bg-gray-100">
-      <div className="lg:w-1/2 w-full bg-white border border-gray-200 rounded-lg shadow-xl p-4 max-sm:p-2">
-        <h3 className="text-xl font-semibold bg-indigo-100 text-indigo-700 py-2 px-4 rounded-t-lg max-sm:text-lg max-sm:px-2">
-          Bed Reservations
-        </h3>
-        <div className="max-h-[28rem] overflow-y-auto p-4 max-sm:p-2">
+    <div className="p-8 min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden"
+      >
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex justify-between items-center">
+          <h3 className="text-2xl font-bold text-white">
+            <FontAwesomeIcon icon={faBed} className="mr-3" />
+            Bed Reservations
+          </h3>
+          <button
+            onClick={handleBackClick}
+            className="text-white hover:text-gray-200 transition-colors duration-300"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+            Back to Home
+          </button>
+        </div>
+        <div className="max-h-[600px] overflow-y-auto p-6">
           {reservations.length > 0 ? (
-            <ul className="space-y-4 max-sm:space-y-2">
+            <ul className="space-y-6">
               {reservations.map((reservation, index) => {
-                // Ensure reservation exists before rendering
                 if (!reservation) return null;
 
                 return (
-                  <li key={reservation.payment_id || index} className="bg-gray-100 p-4 rounded-lg shadow max-sm:p-2">
-                    <div className="flex justify-between items-center max-sm:flex-col">
-                      <div className="max-sm:mb-2">
-                        <h4 className="font-semibold text-lg max-sm:text-base">
+                  <motion.li
+                    key={reservation.payment_id || index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                  >
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                      <div>
+                        <h4 className="font-semibold text-lg text-blue-700 mb-2">
                           Payment ID: {reservation.payment_id || "Not available"}
                         </h4>
-                        <p className="text-gray-600 max-sm:text-sm">
-                          Bed Reservation Time: {reservation.bed_reservation_time
-                            ? new Date(reservation.bed_reservation_time
-                            ).toLocaleString()
+                        <p className="text-gray-600 flex items-center">
+                          <FontAwesomeIcon icon={faClock} className="mr-2 text-blue-500" />
+                          Reserved: {reservation.bed_reservation_time
+                            ? new Date(reservation.bed_reservation_time).toLocaleString()
                             : "Not available"}
                         </p>
-                        <p className="text-gray-600 max-sm:text-sm">
-                          Check-In Time: {reservation.check_in_time
-                            ? new Date(reservation.
-                              check_in_time).toLocaleString()
+                        <p className="text-gray-600 flex items-center mt-1">
+                          <FontAwesomeIcon icon={faClock} className="mr-2 text-green-500" />
+                          Check-In: {reservation.check_in_time
+                            ? new Date(reservation.check_in_time).toLocaleString()
                             : "Not yet checked in"}
                         </p>
-                        <p className="text-gray-600 max-sm:text-sm">
-                          Late Patient: {reservation.late_patient ? "Yes" : "No"}
-                        </p>
+                      </div>
+                      <div className="flex space-x-2 mt-2 md:mt-0">
+                        <button className="text-blue-500 hover:text-blue-600 transition-colors duration-300">
+                          <FontAwesomeIcon icon={faCopy} className="mr-2" />
+                        </button>
+                        <button className="text-green-500 hover:text-green-600 transition-colors duration-300">
+                          <FontAwesomeIcon icon={faShare} className="mr-2" />
+                        </button>
                       </div>
                     </div>
-                    <div className="text-gray-500 max-sm:text-sm">
-                      <p>Username: {reservation.user_info?.username || "N/A"}</p>
-                      <p>Email: {reservation.user_info?.email || "N/A"}</p>
-                      <p>Phone Number: {reservation.user_info?.phone_number || "N/A"}</p>
+                    {reservation.late_patient && (
+                      <div className="mt-2 md:mt-0 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full flex items-center">
+                        <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
+                        Late Patient
+                      </div>
+                    )}
+                    <div className="bg-white p-4 rounded-lg shadow-inner">
+                      <h5 className="font-semibold text-gray-700 mb-2">Patient Information</h5>
+                      <p className="text-gray-600 flex items-center">
+                        <FontAwesomeIcon icon={faUser} className="mr-2 text-blue-400" />
+                        {reservation.user_info?.username || "N/A"}
+                      </p>
+                      <p className="text-gray-600 flex items-center mt-1">
+                        <FontAwesomeIcon icon={faEnvelope} className="mr-2 text-blue-400" />
+                        {reservation.user_info?.email || "N/A"}
+                      </p>
+                      <p className="text-gray-600 flex items-center mt-1">
+                        <FontAwesomeIcon icon={faPhone} className="mr-2 text-blue-400" />
+                        {reservation.user_info?.phone_number || "N/A"}
+                      </p>
                     </div>
-                  </li>
+                  </motion.li>
                 );
               })}
             </ul>
           ) : (
-            <p className="text-gray-600 max-sm:text-sm">No reservations</p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-gray-600 text-center py-8"
+            >
+              No reservations found
+            </motion.p>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
