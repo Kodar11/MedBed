@@ -80,6 +80,11 @@ const HospitalList = () => {
       }
     };
 
+    fetchHospitalData(); // Fetch initial hospital data
+    
+  }, []);
+
+  useEffect(()=>{
     // Fetch available beds data from the backend every 10 seconds
     const fetchAvailableBeds = async () => {
       try {
@@ -90,18 +95,13 @@ const HospitalList = () => {
       }
     };
 
-    fetchHospitalData(); // Fetch initial hospital data
     fetchAvailableBeds(); // Fetch initial available beds data
 
     // Fetch available beds initially and every 10 seconds
-    const interval = setInterval(fetchHospitalData, 10000); // Fetch every 10 seconds
+    const interval = setInterval(fetchAvailableBeds, 5000); // Fetch every 10 seconds
 
     return () => clearInterval(interval); // Cleanup on unmount
-
-    fetchHospitalData();
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+  },[]);
 
   useEffect(() => {
     // Apply city filter and pagination on the frontend
@@ -170,7 +170,7 @@ const HospitalList = () => {
           <HospitalCard 
             key={hospital.hospital.id} 
             hospital={hospital} 
-            availableBeds={hospitalData[hospital.hospital.id]}
+            availableBeds={hospitalData[hospital.hospital.id] > 900 ? null : hospitalData[hospital.hospital.id]}
           />
         ))}
       </div>
