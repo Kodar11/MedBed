@@ -26,7 +26,11 @@ const HospitalList = () => {
       }
     };
 
-    // Fetch available beds data from the backend every 10 seconds
+    fetchHospitalData(); 
+  }, []);
+
+  useEffect(() => {
+    // Fetch available beds data from the backend every 1 seconds
     const fetchAvailableBeds = async () => {
       try {
         const response = await axios.get('http://localhost:3000/api/v1/users/getAvailbleBeds');
@@ -36,14 +40,13 @@ const HospitalList = () => {
       }
     };
 
-    fetchHospitalData(); // Fetch initial hospital data
+    
     fetchAvailableBeds(); // Fetch initial available beds data
 
-    // Fetch available beds initially and every 10 seconds
-    const interval = setInterval(fetchHospitalData, 10000); // Fetch every 10 seconds
+    const interval = setInterval(fetchAvailableBeds, 1000); // Fetch every 1 seconds
 
     return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+  },[]);
 
   useEffect(() => {
     // Apply city and search query filters

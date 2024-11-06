@@ -136,7 +136,6 @@ const createHospital = asyncHandler(async (req, res) => {
         await Promise.all(bedInfoPromises);
 
         // Create doctor record
-        // Create doctor records (assuming multiple doctors may exist)
         const doctorPromises = doctor.map((doc) => {
             return prisma.doctor.create({
                 data: {
@@ -370,67 +369,6 @@ const updateHospital = asyncHandler(async (req, res) => {
 
 
     try {
-
-        // const existingHospital = await prisma.hospital.findUnique({
-        //     where: { id },
-        //     select: {
-        //         mainImage: true,
-        //         subImages: true,
-        //     },
-        // });
-
-        // const uploadedMainImage = mainImage ? await upload(mainImage) : existingHospital.mainImage;
-        // const uploadedSubImages = subImages ? await Promise.all(subImages.map(path => upload(path))) : existingHospital.subImages;
-
-
-        // const updatedHospital = await prisma.hospital.update({
-        //     where: { id },
-        //     data: {
-        //         ...hospital,
-        //         // mainImage: uploadedMainImage ? uploadedMainImage.secure_url : existingHospital.mainImage,
-        //         // subImages: uploadedSubImages.map(img => img.secure_url),
-        //     },
-        // });
-
-        // // Update BedInfo
-        // const updatedBedInfo = await prisma.bedInfo.update({
-        //     where: { hospital_id: id },
-        //     data: {
-        //         ...beds
-        //     },
-        // });
-
-        // // Update Doctor
-        // const updatedDoctor = await prisma.doctor.update({
-        //     where: { hospital_id: id },
-        //     data: {
-        //         ...doctor
-        //     },
-        // });
-
-        // // Update Medical Equipment
-        // const updatedMedicalEquipment = await prisma.medicalEquipment.update({
-        //     where: { hospital_id: id },
-        //     data: {
-        //         ...medicalEquipment
-        //     }
-        // });
-
-        // // Update Service
-        // const updatedService = await prisma.service.update({
-        //     where: { hospital_id: id },
-        //     data: {
-        //         ...service
-        //     },
-        // });
-
-        // // Update Insurance
-        // const updatedInsurance = await prisma.insurance.update({
-        //     where: { hospital_id: id },
-        //     data: {
-        //         ...insurance
-        //     },
-        // });
 
         const updatedHospital = await prisma.hospital.update({
             where: { id },
