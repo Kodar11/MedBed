@@ -1,57 +1,3 @@
-// import React, { useEffect, useState } from 'react';
-// import HospitalCard from '../components/HosptalCard';
-// import axios from 'axios';
-
-
-// const HospitalList = () => {
-//   const [hospitals, setHospitals] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     // Fetch hospital data from the backend
-//     const fetchHospitalData = async () => {
-//       try {
-//         const response = await axios.get('http://localhost:3000/api/v1/hospitals/getAllHospitals');
-//         setHospitals(response.data); // Assuming the API returns a list of hospitals
-//         setLoading(false);
-//         console.log(response.data);
-//       } catch (error) {
-//         console.error('Error fetching hospital data:', error);
-//         setLoading(false);
-//       }
-//     };
-
-//     // Fetch available beds initially and every 10 seconds
-        
-//         const interval = setInterval(fetchHospitalData, 10000); // Fetch every 10 seconds
-
-//         return () => clearInterval(interval); // Cleanup on unmount
-
-//     fetchHospitalData();
-//   }, []);
-
-//   if (loading) {
-//     return <p>Loading...</p>; // Display loading message while data is being fetched
-//   }
-
-//   return (
-//     <div>
-//       <div className="flex flex-col">
-//         {hospitals.slice(0, 5).map((hospital, index) => (
-//           <HospitalCard key={index} id={hospital.id} hospital={hospital} />
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default HospitalList;
-
-
-
-
-
-
 import React, { useEffect, useState } from 'react';
 import HospitalCard from '../components/HosptalCard';
 import axios from 'axios';
@@ -63,16 +9,16 @@ const HospitalList = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1); // Track current page
   const [city, setCity] = useState(''); // Track selected city filter
+  const [searchQuery, setSearchQuery] = useState(''); // Track search query
   const hospitalsPerPage = 5; // Number of hospitals to show per page
   const [hospitalData, setHospitalData] = useState({}); // To store available beds for each hospital
 
-
   useEffect(() => {
-    // Fetch hospital data from the backend once
+
     const fetchHospitalData = async () => {
       try {
         const response = await axios.get('http://localhost:3000/api/v1/hospitals/getAllHospitals');
-        setAllHospitals(response.data); // Store all hospitals in state
+        setAllHospitals(response.data); 
         setLoading(false);
       } catch (error) {
         console.error('Error fetching hospital data:', error);
@@ -97,20 +43,18 @@ const HospitalList = () => {
     const interval = setInterval(fetchHospitalData, 10000); // Fetch every 10 seconds
 
     return () => clearInterval(interval); // Cleanup on unmount
-
-    fetchHospitalData();
-
-    return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
   useEffect(() => {
-    // Apply city filter and pagination on the frontend
-    const filtered = city
-      ? allHospitals.filter(hospital => hospital.hospital.city && hospital.hospital.city.toLowerCase() === city.toLowerCase())
-      : allHospitals;
+    // Apply city and search query filters
+    const filtered = allHospitals.filter(hospital => {
+      const matchesCity = city ? hospital.hospital.city.toLowerCase() === city.toLowerCase() : true;
+      const matchesSearch = searchQuery ? hospital.hospital.name.toLowerCase().includes(searchQuery.toLowerCase()) : true;
+      return matchesCity && matchesSearch;
+    });
   
     setFilteredHospitals(filtered);
-  }, [city, allHospitals]); // Re-run filtering when city or data changes
+  }, [city, searchQuery, allHospitals]); // Re-run filtering when city, search query, or data changes
 
   // Calculate hospitals for current page
   const paginatedHospitals = filteredHospitals.slice(
@@ -131,16 +75,29 @@ const HospitalList = () => {
     setPage(1); // Reset to the first page after applying a filter
   };
 
+  // Handle search query change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value); // Update search query
+    setPage(1); // Reset to the first page after search
+  };
+
   if (loading) {
     return <Loading />; // Use the Loading component instead of the text
   }
 
-  console.log(hospitalData);
-  
-
-
   return (
     <div className="container mx-auto p-6">
+      {/* Search Input */}
+      <div className="mb-4 text-center \">
+        <input
+          type="text"
+          placeholder="Search hospital by name..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="p-2  px-12 border border-blue-500 rounded shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       {/* City Filter Dropdown */}
       <div className="mb-8 text-center">
         <label htmlFor="city-filter" className="text-lg font-semibold text-gray-700">Filter by City:</label>
@@ -163,10 +120,10 @@ const HospitalList = () => {
       <div className="flex flex-col">
         {paginatedHospitals.map((hospital, index) => (
           <HospitalCard 
-          key={hospital.hospital.id} 
-          hospital={hospital} 
-          availableBeds={hospitalData[hospital.hospital.id]} // Use hospitalData[hospital.id] directly
-        />
+            key={hospital.hospital.id} 
+            hospital={hospital} 
+            availableBeds={hospitalData[hospital.hospital.id]} // Use hospitalData[hospital.id] directly
+          />
         ))}
       </div>
 
