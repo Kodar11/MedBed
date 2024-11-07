@@ -184,7 +184,7 @@ const pollDatabases = async () => {
         // Send data to the main server
         if (Object.keys(updatedCounters).length > 0) {
             console.log(`Updated counters:`, updatedCounters);
-            await axios.post("http://localhost:3000/api/v1/users/notify", {
+            await axios.post("https://medbed.onrender.com/api/v1/users/notify", {
                 data: updatedCounters, // Send the updated data with placeholders as needed
             });
             console.log("Notification sent to localhost:3000 with updated data.");
