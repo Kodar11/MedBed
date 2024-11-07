@@ -33,7 +33,7 @@ function Register() {
     e.preventDefault();
     try {
       // Send form data to backend
-      const res = await axios.post('http://localhost:8000/api/v1/users/register', {
+      const res = await axios.post('https://medbed.onrender.com/api/v1/users/register', {
         fullName: formData.name,
         email: formData.email,
         username: formData.username,

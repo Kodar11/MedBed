@@ -10,7 +10,9 @@ app.use(
     cors({
       origin: ["https://med-bed-kohl.vercel.app",
         "http://localhost:5173",
-        "https://medbed-webhook.onrender.com"
+        "http://localhost:5174",
+        "https://medbed-webhook.onrender.com",
+        
       ],
       methods: ["GET", "POST", "DELETE", "UPDATE", "PUT"],
       credentials: true,

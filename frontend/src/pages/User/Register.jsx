@@ -28,7 +28,7 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:8000/api/v1/users/register', {
+      const res = await axios.post('https://medbed.onrender.com/api/v1/users/register', {
         fullName: formData.name,
         email: formData.email,
         password: formData.password,
