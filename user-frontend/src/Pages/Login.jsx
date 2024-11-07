@@ -25,7 +25,7 @@ function LoginForm() {
       const res = await axios.post('https://medbed.onrender.com/api/v1/users/login', {
         username: formData.username,
         password: formData.password
-      }, { withCredentials: true });
+      }, {});
 
       if (res.data.statusCode === 200) {
         navigateToHomePage();
