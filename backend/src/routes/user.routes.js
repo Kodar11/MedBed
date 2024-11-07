@@ -31,4 +31,6 @@ router.route("/getAvailbleBeds").get(getAvailableBeds)
 
 router.route("/search-hospital").get(searchHospitals)
 
+
+
 export default router
