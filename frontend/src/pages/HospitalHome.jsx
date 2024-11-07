@@ -6,10 +6,12 @@ const HospitalHome = () => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);  // Re-enabled loading state
   const [error, setError] = useState(null);
+  const [hospitalData, setHospitalData] = useState({});
 
   const navigate = useNavigate();
   // const hospitalId = "22510046"; // Replace this with actual hospital ID or dynamic logic
   const {hospitalId} = useParams();
+  const {id} = useParams(); 
 
   useEffect(() => {
     const fetchHospitalReservationInfo = async () => {
@@ -35,6 +37,42 @@ const HospitalHome = () => {
 
     fetchHospitalReservationInfo();
   }, [hospitalId]); // Fetch whenever hospitalId changes (optional)
+
+  useEffect(() => {
+    // Fetch available beds data from the backend every 1 seconds
+    const fetchAvailableBeds = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/v1/users/getAvailbleBeds');
+        setHospitalData(response.data); // Assuming API returns data in the format: { hospitalId: availableBeds }
+      } catch (error) {
+        console.error('Error fetching available beds:', error);
+      }
+    };
+
+    
+    fetchAvailableBeds(); // Fetch initial available beds data
+
+    const interval = setInterval(fetchAvailableBeds, 1000); // Fetch every 1 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  },[])
+
+  useEffect(() => {
+    const fetchHospitalDetails = async () => {
+        try {
+            const response = await axios.get(`http://localhost:3000/api/v1/hospitals/getHospitalById?requestId=${id}`);
+            // setHospital(response.data.hospital);
+            console.log(response.data.hospital);
+            
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching hospital details:', error);
+            setLoading(false);
+        }
+    };
+
+    fetchHospitalDetails();
+}, [id]);
 
   if (loading) return <p>Loading...</p>;
   if (error && reservations.length === 0) return <p>{error}</p>; // Show error only if there's no data
@@ -96,6 +134,13 @@ const HospitalHome = () => {
               )}
             </div>
           </div>
+        </div>
+
+        <div>
+            {hospitalData[hospitalId]}
+        </div>
+        <div>
+          {}
         </div>
 
         {/* Centered Button */}
