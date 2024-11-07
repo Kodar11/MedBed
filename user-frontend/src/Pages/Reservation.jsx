@@ -5,18 +5,6 @@ import { faBed, faClock, faUser, faEnvelope, faPhone, faExclamationTriangle, faC
 import { useNavigate } from "react-router-dom";
 
 // Function to get a cookie by name
-const getCookie = (cookieName) => {
-  const name = cookieName + "=";
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const cookieArray = decodedCookie.split(';');
-  for (let i = 0; i < cookieArray.length; i++) {
-    let cookie = cookieArray[i].trim();
-    if (cookie.indexOf(name) === 0) {
-      return cookie.substring(name.length, cookie.length);
-    }
-  }
-  return null;
-};
 
 const decodeToken = (token) => {
   const payload = token.split('.')[1];
@@ -34,10 +22,10 @@ const BedReservations = () => {
         setLoading(true);
 
         // Get the access token from the cookie
-        const accessToken = getCookie("accessToken");
+        const accessToken = localStorage.getItem("accessToken");
 
         if (!accessToken) {
-          console.error("Access token not found");
+          console.log("Access token not found", accessToken);
           setLoading(false);
           return;
         }
