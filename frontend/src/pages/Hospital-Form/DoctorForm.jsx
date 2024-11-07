@@ -185,7 +185,7 @@ function DoctorForm({ data, check }) {
             type="submit"
             className="bg-indigo-600 text-white px-6 py-3 rounded-md shadow hover:bg-indigo-700 transition-all"
           >
-            Submit
+            Next
           </button>
         </div>
       </form>

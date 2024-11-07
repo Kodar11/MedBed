@@ -10,6 +10,7 @@ import ServiceForm from "../pages/Hospital-Form/ServiceForm";
 import InsuranceForm from "../pages/Hospital-Form/InsuranceForm";
 import HealthPackage from "../pages/Hospital-Form/HealthPackage";
 import UploadImages from "../pages/Hospital-Form/UploadImages";
+import NavBar from "./Navbar";
 
 function HospitalFormNavbar() {
     const [activeStep, setActiveStep] = useState(1);
@@ -265,6 +266,7 @@ function HospitalFormNavbar() {
 
     return (
         <>
+            <NavBar/>
             <ol className="flex items-center w-full p-3 space-x-2 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 shadow-sm sm:text-base sm:p-4 sm:space-x-4">
                 <li className={`flex items-center cursor-pointer ${activeStep === 1 ? "text-blue-600" : ""}`} onClick={() => setActiveStep(1)}>
                     <span className={`flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full ${activeStep === 1 ? "border-blue-600" : "border-gray-500"}`}>1</span>
