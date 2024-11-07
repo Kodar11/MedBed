@@ -10,6 +10,8 @@ function ProtectedRoute({ element, children }) {
         try {
 
             const accessToken = localStorage.getItem('accessToken');
+            console.log("Hi",accessToken);
+            
 
             await axios.get('https://medbed.onrender.com/api/v1/users/protected-route', {
                 withCredentials: true,

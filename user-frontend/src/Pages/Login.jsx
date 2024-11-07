@@ -26,7 +26,7 @@ function LoginForm() {
         username: formData.username,
         password: formData.password
       }, {});
-
+      localStorage.setItem("accessToken", res.data.data.accessToken)      
       if (res.data.statusCode === 200) {
         navigateToHomePage();
       } else {

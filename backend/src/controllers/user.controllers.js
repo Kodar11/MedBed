@@ -173,8 +173,8 @@ const loginUser = asyncHandler(async (req, res) => {
     sameSite: "lax"
   };
 
-
-  res.cookie("accessToken", accessToken,options);
+  
+  res.cookie("accessToken", accessToken);
   return res.status(200).json(
     new ApiResponse(
       200,
@@ -194,6 +194,7 @@ const logoutUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
+    sameSite : "lax"
   };
 
   return res
