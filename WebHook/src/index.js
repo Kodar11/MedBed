@@ -107,6 +107,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv"
 import axios from "axios"
+import mongoose from "mongoose"
 
 
 
@@ -123,7 +124,7 @@ let databaseStatus = []; // Track database status for each connection
 // Function to connect to a specific database
 const connectDB = async (uri, dbIndex) => {
     try {
-        const connectionInstance = await mongoose.createConnection(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+        const connectionInstance = await mongoose.createConnection(uri);
         console.log(`\n MongoDB connected! DB HOST: ${connectionInstance.host}`);
         connections.push({ connection: connectionInstance, dbIndex }); // Store the connection instance and index
         databaseStatus[dbIndex] = true; // Mark the database as up
