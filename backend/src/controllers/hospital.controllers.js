@@ -624,7 +624,29 @@ const loginHospital = asyncHandler(async (req, res) => {
     );
   });
   
+  const checkInReservation = asyncHandler(async (req, res) => {
+    const { reservationId } = req.body; // Assuming reservation ID is passed in the request body
+  
+    const updatedReservation = await prisma.bedReservation.update({
+      where: { id: reservationId },
+      data: { check_in: true }
+    });
+  
+    return res.status(200).json(new ApiResponse(200, updatedReservation, "Check-in successful"));
+  });
+  
+  const updateBedCount = asyncHandler(async (req, res) => {
+    const { hospitalId, newBedCount } = req.body; // Assuming hospital ID and new bed count are passed in the request body
+  
+    const updatedBedInfo = await prisma.bedInfo.updateMany({
+      where: { hospital_id: hospitalId },
+      data: { total_beds: newBedCount }
+    });
+  
+    return res.status(200).json(new ApiResponse(200, updatedBedInfo, "Bed count updated successfully"));
+  });
+  
 
 
-
-export { createHospital, getAllHospitals, getHospitalById, updateHospital, deleteHospital, loginHospital } ;
+export { createHospital, getAllHospitals, getHospitalById, updateHospital, deleteHospital, loginHospital, checkInReservation,
+    updateBedCount } ;

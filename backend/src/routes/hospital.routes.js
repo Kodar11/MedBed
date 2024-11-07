@@ -25,7 +25,9 @@ import {
     getHospitalById,
     updateHospital,
     deleteHospital,
-    loginHospital
+    loginHospital,
+    checkInReservation,
+    updateBedCount
 } from "../controllers/hospital.controllers.js"; 
 
 const router = Router();
@@ -52,4 +54,7 @@ router.route("/deleteHospital")
 
 router.route("/login").post(loginHospital);
 
-export default router;
+router.route('/checkIn-reservation').post(checkInReservation)
+router.route('/update-bed-count').post(updateBedCount)
+
+export default router;  

@@ -43,57 +43,57 @@ model UserInsurance {
   coverage_amount   Decimal
 }
 
-model Hospital {
-  id                  String               @id @default(uuid()) @db.VarChar(255)
-  name                String               @db.VarChar(255)
-  address             String               @db.VarChar(255)
-  city                String               @db.VarChar(255)
-  state               String               @db.VarChar(255)
-  zip_code            String               @db.VarChar(255)
-  contact_number      String               @db.VarChar(255)
-  email               String?              @unique @db.VarChar(255)
-  website             String?              @db.VarChar(255)
-  type                String               @db.VarChar(255)
-  accreditation       String?              @db.VarChar(255)
-  account_number      String?              @db.VarChar(255)
+  model Hospital {
+    id                  String               @id @default(uuid()) @db.VarChar(255)
+    name                String               @db.VarChar(255)
+    address             String               @db.VarChar(255)
+    city                String               @db.VarChar(255)
+    state               String               @db.VarChar(255)
+    zip_code            String               @db.VarChar(255)
+    contact_number      String               @db.VarChar(255)
+    email               String?              @unique @db.VarChar(255)
+    website             String?              @db.VarChar(255)
+    type                String               @db.VarChar(255)
+    accreditation       String?              @db.VarChar(255)
+    account_number      String?              @db.VarChar(255)
 
 
-  BedInfos            BedInfo[]
-  BedReservation      BedReservation[]
-  Customization       Customization[]
-  Doctors             Doctor[]
-  HealthPackages      HealthPackage[]
-  Insurances          Insurance[]
-  MedicalEquipments   MedicalEquipment[]
-  PatientTestimonials PatientTestimonial[]
-  Services            Service[]
-}
+    BedInfos            BedInfo[]
+    BedReservation      BedReservation[]
+    Customization       Customization[]
+    Doctors             Doctor[]
+    HealthPackages      HealthPackage[]
+    Insurances          Insurance[]
+    MedicalEquipments   MedicalEquipment[]
+    PatientTestimonials PatientTestimonial[]
+    Services            Service[]
+  }
 
-model HospitalLogin{
-  id              String  @id
-  hospital_id     String    
-  password        String
-  refresh_token   String?   @db.VarChar(255)
-}
+  model HospitalLogin{
+    id              String  @id
+    hospital_id     String    
+    password        String
+    refresh_token   String?   @db.VarChar(255)
+  }
 
-model Customization {
-  id             String   @id @default(uuid()) @db.VarChar(255)
-  hospital_id    String   @db.VarChar(255)
-  active_Service Boolean  @default(true)
-  deposit_Amount Int
-  hospital       Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
-}
+  model Customization {
+    id             String   @id @default(uuid()) @db.VarChar(255)
+    hospital_id    String   @db.VarChar(255)
+    active_Service Boolean  @default(true)
+    deposit_Amount Int
+    hospital       Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  }
 
-model BedInfo {
-  id             String   @id @default(uuid()) @db.VarChar(255)
-  hospital_id    String   @db.VarChar(255)
-  total_beds     Int
-  bed_type       String   @db.VarChar(255)
-  available_beds Int
-  price          Decimal?
-  live_bedcount  Int
-  hospital       Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
-}
+  model BedInfo {
+    id             String   @id @default(uuid()) @db.VarChar(255)
+    hospital_id    String   @db.VarChar(255)
+    total_beds     Int
+    bed_type       String   @db.VarChar(255)
+    available_beds Int
+    price          Decimal?
+    live_bedcount  Int
+    hospital       Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade)
+  }
 
 model Doctor {
   id               String   @id @default(uuid()) @db.VarChar(255)
