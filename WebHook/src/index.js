@@ -104,13 +104,15 @@
 
 
 import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import axios from "axios"; // For sending HTTP requests
+import cors from "cors";
+
+
 
 dotenv.config();
 
 const app = express();
+
+app.use(cors());
 
 let lastCounterValues = {}; // Store last known values for each hospital in all databases
 let connections = []; // Store connection instances
@@ -126,7 +128,7 @@ const connectDB = async (uri, dbIndex) => {
 
         return connectionInstance;
     } catch (error) {
-        console.log(`MONGODB connection FAILED for URI: ${uri}`, error);
+        // console.log(`MONGODB connection FAILED for URI: ${uri}`, error);
         databaseStatus[dbIndex] = false; // Mark the database as down
     }
 };
@@ -144,7 +146,7 @@ const pollDatabases = async () => {
     try {
         for (const { connection, dbIndex } of connections) {
             if (!databaseStatus[dbIndex] || connection.readyState !== 1) {
-                console.log(`Database ${dbIndex} is down. Adding placeholders for hospitals in this database.`);
+                // console.log(`Database ${dbIndex} is down. Adding placeholders for hospitals in this database.`);
 
                 // Replace counts with `1000` for hospitals associated with the downed database
                 if(dbIndex == 1){
@@ -187,9 +189,9 @@ const pollDatabases = async () => {
             await axios.post("https://medbed.onrender.com/api/v1/users/notify", {
                 data: updatedCounters, // Send the updated data with placeholders as needed
             });
-            console.log("Notification sent to localhost:3000 with updated data.");
+            // console.log("Notification sent to localhost:3000 with updated data.");
         } else {
-            console.log("No changes detected.");
+            // console.log("No changes detected.");
         }
     } catch (error) {
         console.error(`Error polling the databases:`, error);
