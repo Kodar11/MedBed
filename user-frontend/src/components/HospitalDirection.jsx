@@ -13,7 +13,7 @@ const HospitalDirection = () => {
         if (hospitalId) {
           console.log(`Fetching location for hospitalId: ${hospitalId}`);
 
-          const response = await axios.get(`http://localhost:3000/api/v1/direction/locations/${hospitalId}`);
+          const response = await axios.get(`https://medbed.onrender.com/api/v1/direction/locations/${hospitalId}`);
           setLocation(response.data.name); // Assuming response.data.name is the Google Maps URL
 
           setLoading(false); 

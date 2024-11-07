@@ -21,7 +21,7 @@ const HospitalHome = () => {
     const fetchHospitalReservationInfo = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(`http://localhost:3000/api/v1/users/get-payment-info-hospital/${hospitalId}`);
+        const { data } = await axios.get(`https://medbed.onrender.com/api/v1/users/get-payment-info-hospital/${hospitalId}`);
         setReservations(data.data || []);
         // console.log(data.data)  
         setLoading(false);
@@ -40,7 +40,7 @@ const HospitalHome = () => {
   useEffect(() => {
     const fetchAvailableBeds = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/v1/users/getAvailbleBeds');
+        const response = await axios.get('https://medbed.onrender.com/api/v1/users/getAvailbleBeds');
         setHospitalData(response.data);
       } catch (error) {
         console.error('Error fetching available beds:', error);
@@ -56,7 +56,7 @@ const HospitalHome = () => {
   useEffect(() => {
     const fetchHospitalDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/hospitals/getHospitalById?requestId=${hospitalId}`);
+        const response = await axios.get(`https://medbed.onrender.com/api/v1/hospitals/getHospitalById?requestId=${hospitalId}`);
         setHospital(response.data.hospital);
         setLoading(false);
       } catch (error) {
@@ -78,7 +78,7 @@ const HospitalHome = () => {
   // Handle check-in for a reservation
   const handleCheckIn = async (reservationId) => {
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/hospitals/checkIn-reservation", { reservationId });
+      const response = await axios.post("https://medbed.onrender.com/api/v1/hospitals/checkIn-reservation", { reservationId });
       alert(response.data.message || "Check-in successful");
       // Refresh reservations after check-in
       const updatedReservations = reservations.map(reservation =>
@@ -93,7 +93,7 @@ const HospitalHome = () => {
   // Handle updating the bed count
   const handleUpdateBedCount = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/hospitals/update-bed-count", {
+      const response = await axios.post("https://medbed.onrender.com/api/v1/hospitals/update-bed-count", {
         hospitalId,
         newBedCount
       });

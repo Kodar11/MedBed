@@ -53,7 +53,7 @@ const BedReservations = () => {
         }
 
         // Fetch reservations based on the userId
-        const response = await axios.get(`http://localhost:3000/api/v1/users/get-payment-info-user/${userId}`);
+        const response = await axios.get(`https://medbed.onrender.com/api/v1/users/get-payment-info-user/${userId}`);
         
         // Handle the received data
         if (response.data && response.data.data) {

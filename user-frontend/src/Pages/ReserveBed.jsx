@@ -68,7 +68,7 @@ const RazorpayPayment = () => { // Accept hospitalId as a prop
       image: "https://example.com/your_logo", // Replace with actual logo URL
       handler: function (response) {
         // Payment was successful, now make the Axios request to create a reservation
-        axios.post("http://localhost:3000/api/v1/users/create-bed-reservation", {
+        axios.post("https://medbed.onrender.com/api/v1/users/create-bed-reservation", {
           paymentId: response.razorpay_payment_id, // Payment ID from Razorpay
           userId: userId, // Extracted userId from the token
           hospitalId: hospitalId, // Pass the hospitalId

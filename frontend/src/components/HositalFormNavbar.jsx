@@ -187,7 +187,7 @@ function HospitalFormNavbar() {
         if (isFound == false) {
             try {
                 const response = await axios.post(
-                    'http://localhost:3000/api/v1/hospitals/createHospital',
+                    'https://medbed.onrender.com/api/v1/hospitals/createHospital',
                     formData,
 
                 );
@@ -199,7 +199,7 @@ function HospitalFormNavbar() {
         else {
             try {
                 const response = await axios.put(
-                    `http://localhost:3000/api/v1/hospitals/updateHospital/${hospitalId}`,
+                    `https://medbed.onrender.com/api/v1/hospitals/updateHospital/${hospitalId}`,
                     formData,
                 );
 

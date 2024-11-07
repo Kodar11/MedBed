@@ -64,7 +64,7 @@
 //             console.log(`Counters changed! Sending all values:`, updatedCounters);
 
 //             // Send the updated data to the other server
-//             await axios.post("http://localhost:3000/api/v1/users/notify", {
+//             await axios.post("https://medbed.onrender.com/api/v1/users/notify", {
 //                 data: updatedCounters, // Send the entire map of hospital_id: counter
 //             });
 

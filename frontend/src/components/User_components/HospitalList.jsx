@@ -12,7 +12,7 @@ const HospitalList = () => {
     // Fetch hospital data from the backend
     const fetchHospitalData = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/v1/hospitals/getAllHospitals');
+        const response = await axios.get('https://medbed.onrender.com/api/v1/hospitals/getAllHospitals');
         setHospitals(response.data); // Assuming the API returns a list of hospitals
         setLoading(false);
         // console.log(response.data);

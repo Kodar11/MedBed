@@ -14,7 +14,7 @@ const HospitalDetails = () => {
   useEffect(() => {
     const fetchHospitalDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/hospitals/getHospitalById?requestId=${id}`);
+        const response = await axios.get(`https://medbed.onrender.com/api/v1/hospitals/getHospitalById?requestId=${id}`);
         setHospital(response.data.hospital);  
         setLoading(false);
       } catch (error) {

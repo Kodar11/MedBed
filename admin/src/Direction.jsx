@@ -18,7 +18,7 @@
 //     try {
 //       const location = locations[hospitalId] || ''; // Get the specific location for the hospital
 
-//       await axios.post('http://localhost:3000/api/v1/direction/store-end-location', {
+//       await axios.post('https://medbed.onrender.com/api/v1/direction/store-end-location', {
 //         id: hospitalId, end: location
 //       }, 
 //       // {
@@ -41,7 +41,7 @@
 //     setLoading(true); // Start loading
 
 //     try {
-//       const response = await axios.post('http://localhost:3000/api/v1/location/check', {
+//       const response = await axios.post('https://medbed.onrender.com/api/v1/location/check', {
 //         id: hospitalId, // Passing the hospital ID to the backend
 //       });
 
@@ -65,7 +65,7 @@
 //     // Fetch hospital data from the backend
 //     const fetchHospitalData = async () => {
 //       try {
-//         const response = await axios.get('http://localhost:3000/api/v1/hospitals/getAllHospitals');
+//         const response = await axios.get('https://medbed.onrender.com/api/v1/hospitals/getAllHospitals');
 //         setHospitals(response.data); // Assuming the API returns a list of hospitals
 //         setLoading(false);
 //         console.log(response.data);
@@ -155,7 +155,7 @@ const Direction = () => {
   // Function to check if a location is set for a specific hospital
   const checkLocationForHospital = async (hospitalId) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/v1/location/check-location/${hospitalId}`);
+      const response = await axios.get(`https://medbed.onrender.com/api/v1/location/check-location/${hospitalId}`);
       return response.status === 200; // Return true if location is set, otherwise false
     } catch (error) {
       console.error(`Error checking location for hospital ${hospitalId}:`, error);
@@ -168,7 +168,7 @@ const Direction = () => {
     setLoading(true);
 
     try {
-      const response = await axios.get('http://localhost:3000/api/v1/hospitals/getAllHospitals');
+      const response = await axios.get('https://medbed.onrender.com/api/v1/hospitals/getAllHospitals');
       const allHospitals = response.data;
 
       // Filter hospitals to only include those without a location set
@@ -194,7 +194,7 @@ const Direction = () => {
     try {
       const location = locations[hospitalId] || ''; // Get location for the specific hospital
 
-      await axios.post('http://localhost:3000/api/v1/direction/store-end-location', {
+      await axios.post('https://medbed.onrender.com/api/v1/direction/store-end-location', {
         id: hospitalId,
         end: location,
       });
