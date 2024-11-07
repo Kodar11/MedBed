@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faClock, faUser, faEnvelope, faPhone, faExclamationTriangle, faCopy, faShare, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +17,7 @@ const getCookie = (cookieName) => {
   }
   return null;
 };
+
 const decodeToken = (token) => {
   const payload = token.split('.')[1];
   return JSON.parse(atob(payload));
@@ -55,10 +55,6 @@ const BedReservations = () => {
         // Fetch reservations based on the userId
         const response = await axios.get(`http://localhost:3000/api/v1/users/get-payment-info-user/${userId}`);
         
-        console.log("Full API response:", response);
-        console.log("Response data:", response.data);
-        console.log("Response data.data:", response.data.data);
-
         // Handle the received data
         if (response.data && response.data.data) {
           let reservationsData = response.data.data;
@@ -70,7 +66,6 @@ const BedReservations = () => {
           }
 
           setReservations(reservationsData);
-          console.log("Set reservations:", reservationsData);
         } else {
           console.warn("No reservation data found in the API response");
           setReservations([]);
@@ -92,22 +87,13 @@ const BedReservations = () => {
 
   if (loading) return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <motion.div
-        className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-      ></motion.div>
+      <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
     </div>
   );
 
   return (
     <div className="p-8 min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden"
-      >
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex justify-between items-center">
           <h3 className="text-2xl font-bold text-white">
             <FontAwesomeIcon icon={faBed} className="mr-3" />
@@ -128,12 +114,10 @@ const BedReservations = () => {
                 if (!reservation) return null;
 
                 return (
-                  <motion.li
+                  <li
                     key={reservation.payment_id || index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
                     className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                    style={{ boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}
                   >
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
                       <div>
@@ -183,22 +167,17 @@ const BedReservations = () => {
                         {reservation.user_info?.phone_number || "N/A"}
                       </p>
                     </div>
-                  </motion.li>
+                  </li>
                 );
               })}
             </ul>
           ) : (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="text-gray-600 text-center py-8"
-            >
+            <p className="text-gray-600 text-center py-8">
               No reservations found
-            </motion.p>
+            </p>
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

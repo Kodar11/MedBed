@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import HospitalCard from '../components/HosptalCard';
 import axios from 'axios';
 import Loading from './Loading'; // Import the Loading component
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
 const HospitalList = () => {
   const [allHospitals, setAllHospitals] = useState([]); // Store all hospitals
@@ -14,7 +16,6 @@ const HospitalList = () => {
   const [hospitalData, setHospitalData] = useState({}); // To store available beds for each hospital
 
   useEffect(() => {
-
     const fetchHospitalData = async () => {
       try {
         const response = await axios.get('http://localhost:3000/api/v1/hospitals/getAllHospitals');
@@ -26,11 +27,11 @@ const HospitalList = () => {
       }
     };
 
-    fetchHospitalData(); 
+    fetchHospitalData(); // Fetch initial hospital data
   }, []);
 
   useEffect(() => {
-    // Fetch available beds data from the backend every 1 seconds
+    // Fetch available beds data from the backend every 10 seconds
     const fetchAvailableBeds = async () => {
       try {
         const response = await axios.get('http://localhost:3000/api/v1/users/getAvailbleBeds');
@@ -40,13 +41,13 @@ const HospitalList = () => {
       }
     };
 
-    
     fetchAvailableBeds(); // Fetch initial available beds data
 
-    const interval = setInterval(fetchAvailableBeds, 1000); // Fetch every 1 seconds
+    // Fetch available beds initially and every 10 seconds
+    const interval = setInterval(fetchAvailableBeds, 5000); // Fetch every 10 seconds
 
     return () => clearInterval(interval); // Cleanup on unmount
-  },[]);
+  }, []);
 
   useEffect(() => {
     // Apply city and search query filters
@@ -90,15 +91,20 @@ const HospitalList = () => {
 
   return (
     <div className="container mx-auto p-6">
-      {/* Search Input */}
-      <div className="mb-4 text-center \">
-        <input
-          type="text"
-          placeholder="Search hospital by name..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-          className="p-2  px-12 border border-blue-500 rounded shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      {/* Updated Search Input */}
+      <div className="mb-4">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search hospitals..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="block w-full p-4 pl-10 pr-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
+          />
+          <span className="absolute left-3 top-1/2 transform -translate-y-1/2">
+            <FontAwesomeIcon icon={faSearch} className="text-gray-400" />
+          </span>
+        </div>
       </div>
 
       {/* City Filter Dropdown */}
@@ -130,7 +136,7 @@ const HospitalList = () => {
           <HospitalCard 
             key={hospital.hospital.id} 
             hospital={hospital} 
-            availableBeds={hospitalData[hospital.hospital.id]} // Use hospitalData[hospital.id] directly
+            availableBeds={hospitalData[hospital.hospital.id] > 900 ? null : hospitalData[hospital.hospital.id]}
           />
         ))}
       </div>

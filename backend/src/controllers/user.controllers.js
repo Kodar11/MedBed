@@ -203,6 +203,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 
+
 const sendPaymentInfo = asyncHandler(async (req, res) => {
   try {
     const { id: userId } = req.params; // Getting userId from request params
@@ -212,10 +213,10 @@ const sendPaymentInfo = asyncHandler(async (req, res) => {
       throw new ApiError(400, "User ID is required");
     }
 
-    console.log("Fetching bed reservation for user ID:", userId);
+    console.log("Fetching bed reservations for user ID:", userId);
 
-    // Fetch bed reservation with the user details via relation
-    const bedReservation = await prisma.bedReservation.findFirst({
+    // Fetch all bed reservations with user details via relation
+    const bedReservations = await prisma.bedReservation.findMany({
       where: { userId: userId }, // Foreign key used here
       select: {
         id: true,
@@ -233,48 +234,48 @@ const sendPaymentInfo = asyncHandler(async (req, res) => {
       },
     });
 
-    if (!bedReservation) {
-      throw new ApiError(404, "Bed reservation not found");
+    if (!bedReservations || bedReservations.length === 0) {
+      throw new ApiError(404, "No bed reservations found");
     }
 
-    console.log("Bed reservation found:", bedReservation);
+    console.log("Bed reservations found:", bedReservations);
 
-    const { id: reservationId, user, paymentId, reservationTime, checkInTime, late_patient } = bedReservation;
-
-    // Get the current time
+    // Check for late patients and update if needed
     const currentTime = new Date();
+    const updatedReservations = await Promise.all(
+      bedReservations.map(async (reservation) => {
+        let isLatePatient = reservation.late_patient;
 
-    // Check if the patient is late (current time is past the check-in time)
-    let isLatePatient = late_patient;
-    if (!late_patient && checkInTime && currentTime > checkInTime) {
-      console.log("Patient is late, updating late_patient field...");
-      // Update late_patient to true if the current time has passed the check-in time
-      await prisma.bedReservation.update({
-        where: { id: reservationId },
-        data: { late_patient: true },
-      });
-      isLatePatient = true;
-    }
+        if (!isLatePatient && reservation.checkInTime && currentTime > reservation.checkInTime) {
+          console.log(`Patient with reservation ID ${reservation.id} is late, updating late_patient field...`);
+          await prisma.bedReservation.update({
+            where: { id: reservation.id },
+            data: { late_patient: true },
+          });
+          isLatePatient = true;
+        }
 
-    // Construct the payload to send to the hospital or user
-    const payload = {
-      reservation_id: reservationId,  // Include the reservation ID in the payload
-      user_info: {
-        username: user.username,
-        email: user.email,
-        phone_number: user.phone_number,
-      },
-      payment_id: paymentId,
-      bed_reservation_time: reservationTime || "Not available", // Fallback if null
-      check_in_time: checkInTime || "Not yet checked in",        // Fallback if null
-      late_patient: isLatePatient,
-    };
+        // Construct the payload for each reservation
+        return {
+          reservation_id: reservation.id,
+          user_info: {
+            username: reservation.user.username,
+            email: reservation.user.email,
+            phone_number: reservation.user.phone_number,
+          },
+          payment_id: reservation.paymentId,
+          bed_reservation_time: reservation.reservationTime || "Not available",
+          check_in_time: reservation.checkInTime || "Not yet checked in",
+          late_patient: isLatePatient,
+        };
+      })
+    );
 
     res.status(200).json(
-      new ApiResponse(200, payload, "Payment and bed reservation info sent successfully")
+      new ApiResponse(200, updatedReservations, "All payment and bed reservation info sent successfully")
     );
   } catch (error) {
-    console.error("Error in sendPaymentInfo:", error); // Log the error to the console
+    console.error("Error in sendPaymentInfo:", error);
     res.status(500).json({
       message: error.message || "Internal Server Error",
     });
