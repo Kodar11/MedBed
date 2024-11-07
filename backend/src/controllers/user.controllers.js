@@ -302,6 +302,7 @@ const getHospitalReservationInfo = asyncHandler(async (req, res) => {
         paymentId: true,
         reservationTime: true,
         checkInTime: true,
+        check_in: true,
         late_patient: true,
         user: {  // Select user info associated with the reservation
           select: {
@@ -330,6 +331,7 @@ const getHospitalReservationInfo = asyncHandler(async (req, res) => {
       payment_id: reservation.paymentId,
       bed_reservation_time: reservation.reservationTime || "Not available",
       check_in_time: reservation.checkInTime || "Not yet checked in",
+      check_in: reservation.check_in,
       late_patient: reservation.late_patient,
     }));
 

@@ -11,6 +11,7 @@ const HospitalHome = () => {
   const [error, setError] = useState(null);
   const [hospitalData, setHospitalData] = useState({});
   const [hospital, setHospital] = useState({});
+  const [newBedCount, setNewBedCount] = useState(0); // New state for bed count input
 
   let bedCount = 0;
   const navigate = useNavigate();
@@ -22,15 +23,19 @@ const HospitalHome = () => {
         setLoading(true);
         const { data } = await axios.get(`http://localhost:3000/api/v1/users/get-payment-info-hospital/${hospitalId}`);
         setReservations(data.data || []);
+        // console.log(data.data)  
         setLoading(false);
+        reservations
+          .filter((reservation) => !reservation.check_in)
+          .map((reservation) => (handleCheckIn(reservation.reservation_id)))
       } catch (error) {
         setError("Error fetching reservation data");
         setLoading(false);
       }
     };
 
-    fetchHospitalReservationInfo();
-  }, [hospitalId]);
+    fetchHospitalReservationInfo()
+  }, []);
 
   useEffect(() => {
     const fetchAvailableBeds = async () => {
@@ -70,6 +75,34 @@ const HospitalHome = () => {
     navigate(`/hospital-form/${hospitalId}`);
   };
 
+  // Handle check-in for a reservation
+  const handleCheckIn = async (reservationId) => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/v1/hospitals/checkIn-reservation", { reservationId });
+      alert(response.data.message || "Check-in successful");
+      // Refresh reservations after check-in
+      const updatedReservations = reservations.map(reservation =>
+        reservation.reservation_id === reservationId ? { ...reservation, check_in: true } : reservation
+      );
+      setReservations(updatedReservations);
+    } catch (error) {
+      console.error("Error checking in:", error);
+    }
+  };
+
+  // Handle updating the bed count
+  const handleUpdateBedCount = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/v1/hospitals/update-bed-count", {
+        hospitalId,
+        newBedCount
+      });
+      alert(response.data.message || "Bed count updated successfully");
+    } catch (error) {
+      console.error("Error updating bed count:", error);
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar />
@@ -80,13 +113,15 @@ const HospitalHome = () => {
             Bed Reservations
           </h3>
           <div className="max-h-[20rem] overflow-y-auto p-4">
-            {reservations.length > 0 ? (
+            {reservations.filter((reservation) => !reservation.check_in).length > 0 ? (
               <ul className="space-y-4">
-                {reservations.map((reservation, index) => {
-                  if (!reservation) return null;
-
-                  return (
-                    <li key={reservation.reservation_id || index} className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                {reservations
+                  .filter((reservation) => !reservation.check_in)
+                  .map((reservation, index) => (
+                    <li
+                      key={reservation.reservation_id || index}
+                      className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                    >
                       <div className="flex justify-between items-center">
                         <div>
                           <h4 className="font-semibold text-lg text-blue-700 mb-2">
@@ -108,6 +143,12 @@ const HospitalHome = () => {
                           )}
                         </div>
                         <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleCheckIn(reservation.reservation_id)}
+                            className="text-blue-500 hover:text-blue-600 transition-colors duration-300"
+                          >
+                            Check In
+                          </button>
                           <button className="text-blue-500 hover:text-blue-600 transition-colors duration-300">
                             <FontAwesomeIcon icon={faCopy} />
                           </button>
@@ -132,13 +173,14 @@ const HospitalHome = () => {
                         </p>
                       </div>
                     </li>
-                  );
-                })}
+                  ))}
               </ul>
             ) : (
               <p className="text-gray-600 text-center py-8">No reservations made</p>
             )}
           </div>
+
+
           <div className="p-6 mt-6 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-blue-100 text-blue-800 p-4 rounded-lg shadow-md flex flex-col items-center">
               <h4 className="text-2xl font-bold mb-1">{hospitalData[hospitalId] || 0}</h4>
@@ -160,6 +202,21 @@ const HospitalHome = () => {
             </div>
           </div>
 
+          <div className="w-full flex justify-center mt-8">
+            <input
+              type="number"
+              placeholder="Enter new bed count"
+              className="border border-gray-300 p-2 rounded-md mr-2"
+              value={newBedCount}
+              onChange={(e) => setNewBedCount(e.target.value)}
+            />
+            <button
+              onClick={handleUpdateBedCount}
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
+            >
+              Update Bed Count
+            </button>
+          </div>
           <div className="w-full flex justify-center mt-8">
             <button
               onClick={handleClick}
