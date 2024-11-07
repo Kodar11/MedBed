@@ -12,6 +12,7 @@ app.use(
         "http://localhost:5173",
         "http://localhost:5174",
         "https://medbed-webhook.onrender.com",
+        "https://med-bed-4399.vercel.app"
         
       ],
       methods: ["GET", "POST", "DELETE", "UPDATE", "PUT"],
