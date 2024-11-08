@@ -29,7 +29,7 @@ const HospitalHome = () => {
           .filter((reservation) => !reservation.check_in)
           .map((reservation) => (handleCheckIn(reservation.reservation_id)))
       } catch (error) {
-        setError("Error fetching reservation data");
+        // setError("Error fetching reservation data");
         setLoading(false);
       }
     };
@@ -43,7 +43,7 @@ const HospitalHome = () => {
         const response = await axios.get('https://medbed.onrender.com/api/v1/users/getAvailbleBeds');
         setHospitalData(response.data);
       } catch (error) {
-        console.error('Error fetching available beds:', error);
+        // console.error('Error fetching available beds:', error);
       }
     };
 
@@ -60,7 +60,7 @@ const HospitalHome = () => {
         setHospital(response.data.hospital);
         setLoading(false);
       } catch (error) {
-        setError("Error fetching hospital details");
+        // setError("Error fetching hospital details");
         setLoading(false);
       }
     };
@@ -86,7 +86,7 @@ const HospitalHome = () => {
       );
       setReservations(updatedReservations);
     } catch (error) {
-      console.error("Error checking in:", error);
+      // console.error("Error checking in:", error);
     }
   };
 
@@ -183,13 +183,13 @@ const HospitalHome = () => {
 
           <div className="p-6 mt-6 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-blue-100 text-blue-800 p-4 rounded-lg shadow-md flex flex-col items-center">
-              <h4 className="text-2xl font-bold mb-1">{hospitalData[hospitalId] || 0}</h4>
+              <h4 className="text-2xl font-bold mb-1">{hospitalData[hospitalId] }</h4>
               <p className="text-lg font-semibold">Available Beds</p>
             </div>
 
             <div className="bg-red-100 text-red-800 p-4 rounded-lg shadow-md flex flex-col items-center">
               <h4 className="text-2xl font-bold mb-1">
-                {hospital.BedInfos?.reduce((total, bedInfo) => total + bedInfo.total_beds, 0) - (hospitalData[hospitalId] || 0)}
+                {hospital.BedInfos?.reduce((total, bedInfo) => total + bedInfo.total_beds, 0) - (hospitalData[hospitalId])}
               </h4>
               <p className="text-lg font-semibold">Beds Booked</p>
             </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 
 import HospitalInfo from "../pages/Hospital-Form/HospitalInfo";
 import BedInfoForm from "../pages/Hospital-Form/BedInfoForm";
@@ -27,8 +27,7 @@ function HospitalFormNavbar() {
 
     });
 
-    // mainImage: null,
-    // subImages: [],
+    const navigate = useNavigate();
 
     const handleFormSubmit = (formName, data, stepNo) => {
         setFormData((prevFormData) => ({
@@ -45,69 +44,6 @@ function HospitalFormNavbar() {
 
     const { id } = hospitalId;
 
-
-    // const handleImageUpload = (imageType, images) => {
-    //     if (imageType === "mainImage" && images.length > 0) {
-    //         setFormData((prevFormData) => ({
-    //             ...prevFormData,
-    //             mainImage: images[0],
-    //         }));
-    //     } else if (imageType === "subImages" && images.length > 0) {
-    //         setFormData((prevFormData) => ({
-    //             ...prevFormData,
-    //             subImages: [...prevFormData.subImages, ...images],
-    //         }));
-    //     }
-    //     setActiveStep(9);
-    // };
-
-    // const handleFinalSubmit = async () => {
-    //     const finalData = new FormData();
-
-    //     console.log(formData);
-
-    //     // Append non-file data
-    //     Object.keys(formData).forEach((key) => {
-    //         if (key !== "mainImage" && key !== "subImages") {
-    //             console.log("Vivek" , key , formData[key]);
-    //             if (typeof formData[key] === 'object' && formData[key] !== null) {
-    //                 Object.entries(formData[key]).forEach(([subKey, subValue]) => {
-    //                     finalData.append(`${key}[${subKey}]`, subValue);
-    //                 });
-    //             } else {
-    //                 finalData.append(key, formData[key]);
-    //             }
-    //             console.log(finalData);
-    //         }
-    //     });
-
-    //     // Append the mainImage (if it exists)
-    //     if (formData.mainImage) {
-    //         finalData.append("mainImage", formData.mainImage);
-    //     }
-
-    //     // Append subImages (if any)
-    //     if (formData.subImages.length > 0) {
-    //         formData.subImages.forEach((image, index) => {
-    //             finalData.append(`subImages[${index}]`, image);
-    //         });
-    //     }
-
-    //     // Create the hospital in the backend
-    //     try {
-    //         console.log("hello " , finalData);
-    //         const response = await axios.post(
-    //             'https://medbed.onrender.com/api/v1/hospitals/createHospital',
-    //             finalData,
-    //             {
-    //                 headers: { 'Content-Type': 'multipart/form-data' },
-    //             }
-    //         );
-    //         console.log("Hospital created successfully", response.data);
-    //     } catch (error) {
-    //         console.error("Error creating hospital:", error.response?.data || error.message);
-    //     }
-    // };
 
     useEffect(() => {
         // Fetch hospital data only if hospitalId exists
@@ -149,37 +85,6 @@ function HospitalFormNavbar() {
 
 
     const handleFinalSubmit = async () => {
-        // const finalData = new FormData();
-
-        // Append non-file data
-        // Object.keys(formData).forEach((key) => {
-        //     if (key !== "mainImage" && key !== "subImages") {
-        //         if (typeof formData[key] === 'object' && formData[key] !== null) {
-        //             // Log the nested object to see its structure
-        //             console.log("Processing object:", formData[key]);
-        //             Object.entries(formData[key]).forEach(([subKey, subValue]) => {
-        //                 console.log(`${key}[${subKey}]`, subValue);
-        //                 finalData.append(`${key}[${subKey}]`, subValue.toString());
-        //             });
-        //         } else {
-        //             console.log("Appending simple key-value pair:");
-        //             console.log(key, formData[key]);
-        //             finalData.append(key, formData[key]);
-        //         }
-        //     }
-        // });
-
-        // Append the mainImage (if it exists)
-        // if (formData.mainImage) {
-        //     finalData.append("mainImage", formData.mainImage);
-        // }
-
-        // // Append subImages (if any)
-        // if (formData.subImages.length > 0) {
-        //     formData.subImages.forEach((image, index) => {
-        //         finalData.append(`subImages[${index}]`, image);
-        //     });
-        // }
 
         console.log(formData);
 
@@ -192,6 +97,7 @@ function HospitalFormNavbar() {
 
                 );
                 console.log("Hospital created successfully", response.data);
+                navigate(`/hospital-home/${hospitalId}`);
             } catch (error) {
                 console.error("Error creating hospital:", error.response?.data || error.message);
             }
@@ -204,6 +110,7 @@ function HospitalFormNavbar() {
                 );
 
                 console.log("Hospital updated successfully", response.data);
+                navigate(`/hospital-home/${hospitalId}`);
             } catch (error) {
                 console.error("Error updating hospital:", error.response?.data || error.message);
             }
